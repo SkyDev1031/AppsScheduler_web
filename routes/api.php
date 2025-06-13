@@ -66,6 +66,7 @@ Route::prefix('/appusers')->group(function () {
     Route::post("/block",                           [AppUserController::class, 'blockAppUser']);
     Route::post("/delete",                          [AppUserController::class, 'deleteAppUser']);
     Route::post("/isActive",                        [AppUserController::class, 'isAllowParticipant']);
+    Route::post("/send",                            [AppUserController::class, 'sendNotification']); 
 });
 
 // App Api Router

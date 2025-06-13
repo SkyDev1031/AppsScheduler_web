@@ -144,7 +144,7 @@ const CategoryManagement = () => {
                     <div className='d-flex'>
                         <div className="me-auto p-2">
                             <button label='Reload' onClick={fetchCategories} className="btn btn-default"><i className='fa fa-refresh' /> Reload</button>
-                            <button label='New Category' onClick={openCreateModal} className="btn btn-default"><i className='fas fa-plus' /> New Category</button>
+                            <button label='New Category' onClick={openCreateModal} className="btn btn-primary"><i className='fas fa-plus' /> New Category</button>
                         </div>
                         <div className="p-2">
                             <span className="p-input-icon-left">

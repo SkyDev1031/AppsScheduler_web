@@ -324,7 +324,7 @@ const RecommendationManagement = () => {
         <div className="flex gap-2">
             <Button
                 icon="pi pi-send"
-                className="p-button-success p-button-sm"
+                className="p-button-primary p-button-sm"
                 tooltip="Send to Participant"
                 tooltipOptions={{ position: 'top' }}
                 onClick={() => openParticipantsDialog(rowData)}

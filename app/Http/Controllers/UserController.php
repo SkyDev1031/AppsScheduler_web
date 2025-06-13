@@ -16,7 +16,6 @@ class UserController extends Controller
     {
         $username = $request->username;
         $password = $request->password;
-
         $user = User::where('username', $username)->orWhere('ScreenName', $username)->first();
         $message = null;
         if (!$user || !Hash::check($password, $user->password)) $message = 'These credentials do not match our records.';
@@ -28,8 +27,16 @@ class UserController extends Controller
             return response(['message' => $message, 'success' => false], 200);
         }
         $ip = $request->ip();
-
-        $token = $user->createToken('Personal Access Token')->accessToken;
+        try {
+            $token = $user->createToken('Personal Access Token')->accessToken;
+            if (!$token) {
+                return response(['message' => 'Failed to create access token.', 'success' => false], 200);
+            }    
+        }
+        catch(\Exception $e) {
+            Log::error('Error creating access token: ' . $e->getMessage());
+            return response(['message' => $e->getMessage(), 'success' => false], 200);
+        }
         $userdata = array(
             'LoginIP' => $ip,
             'LoginStatus' => 1,

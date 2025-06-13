@@ -233,4 +233,41 @@ class AppUserController extends Controller
             return response()->json(['error' => 'Participant ID is required.', 'status' => false], 400);
         }
     }
+
+    public function sendNotification(Request $request)
+    {
+        $id = $request->appUserID || $request->id;
+        $title = $request->title;
+        $content = $request->content;
+    
+        // Validate required fields
+        if (!$id || !$title || !$content) {
+            return response()->json(['error' => 'App user ID, title, and content are required.'], 400);
+        }
+    
+        try {
+            // Retrieve the AppUser record
+            $appUser = AppUser::find($id);
+    
+            if (!$appUser) {
+                return response()->json(['error' => 'App user not found.'], 404);
+            }
+    
+            // Get the FCM token from the AppUser model
+            $fcmToken = $appUser->fcm_token;
+    
+            if (!$fcmToken) {
+                return response()->json(['error' => 'FCM token not found for the specified user.'], 400);
+            }
+    
+            // Dispatch the job to send the notification
+            SendStudyNotification::dispatch($fcmToken, $title, $content);
+    
+            return response()->json(['message' => 'Notification sent successfully.'], 200);
+        } catch (\Exception $e) {
+            Log::error("Error sending notification: " . $e->getMessage());
+            return response()->json(['error' => 'Failed to send notification.'], 500);
+        }
+    }
+
 }

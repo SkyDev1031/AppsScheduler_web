@@ -5,3 +5,4 @@ export const getApprovedParticipantsApi = (study_id) => _REQUEST('appusers/appro
 export const allowParticipantApi = (id) => _REQUEST('appusers/allow', _REQ_METHOD.POST, { appUserID: id });
 export const blockParticipantApi = (id) => _REQUEST('appusers/block', _REQ_METHOD.POST, { appUserID: id });
 export const deleteParticipantApi = (id) => _REQUEST('appusers/delete', _REQ_METHOD.POST, { appUserID:  id });
+export const sendNotificationApi = (id, title, content) => _REQUEST('appusers/send', _REQ_METHOD.POST, { appUserID: id, title, content });
