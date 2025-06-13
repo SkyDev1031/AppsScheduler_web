@@ -21,8 +21,8 @@ const Login = () => {
         await login(email, password)
     }
     return (
-        <section className="login-reg">
-            <div className="overlay mt-40">
+        <section className="login-reg" style={{  marginTop: '2%' }}>
+            <div className="overlay">
                 <div className="container">
                     <div className="row align-items-center justify-content-center">
                         <div className="col-xl-6 order-xl-0 order-1">
