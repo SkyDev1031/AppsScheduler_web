@@ -4,6 +4,7 @@
 /public/fonts
 /public/images
 /public/uploads
+/public/mix-manifest.json
 /storage/*.key
 /storage/framework
 /storage/app/public
