@@ -1,0 +1,319 @@
+:root {
+    --anim-color: rgba(255, 255, 255, 0.4);
+}
+
+.rp-image-prev {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #6366F1;
+    color: white;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@keyframes callingAnim {
+    0% {
+        transform: scale(1);
+    }
+
+    15% {
+        box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.4);
+    }
+
+    25% {
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.4), 0 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+
+    25% {
+        box-shadow: 0 0 0 15px rgba(255, 255, 255, 0.4), 0 0 0 30px rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* INCOMMING STYLE */
+.rp-incomming {
+    display: flex;
+    background: #fff;
+    padding: 10px 20px;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 1px 0px 9px 0px black;
+    z-index: 1500;
+    position: fixed;
+    width: 100%;
+    top: 0;
+}
+
+.rp-incomming>img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+}
+
+.rp-incomming-text {
+    flex: 1;
+    margin-left: 20px;
+}
+
+.rp-incomming-text>p {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.rp-incomming-text>div {
+    font-size: 0.7em;
+    line-height: 8px;
+}
+
+.no-back {
+    background-color: unset !important;
+}
+
+.rp-calling-action {
+    cursor: pointer;
+    background-color: #6366F1;
+    color: white;
+    margin-left: 20px;
+    font-size: 24px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    display: inline-flex;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    align-items: center;
+}
+
+.rp-calling-action.rp-decline {
+    background-color: red;
+    transform: rotate(225deg);
+    -webkit-transform: rotate(225deg);
+    -moz-transform: rotate(225deg);
+    -ms-transform: rotate(225deg);
+    -o-transform: rotate(225deg);
+}
+
+/* OUTGOING STYLE */
+.rp-outgoing {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1400;
+    display: flex;
+    flex-direction: column;
+}
+
+.rp-outgoing-header {
+    display: flex;
+    background: #000;
+    padding: 5px 10px;
+    align-items: center;
+    box-shadow: 1px 0px 9px 0px black;
+    width: 100%;
+}
+
+.rp-outgoing-header>img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+}
+
+.rp-outgoing-text {
+    flex: 1;
+    margin-left: 20px;
+    margin-top: -8px;
+}
+
+.rp-outgoing-text>p {
+    color: white;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.rp-outgoing-text>div {
+    color: white;
+    font-size: 0.7em;
+    line-height: 8px;
+}
+
+.rp-outgoing-container {
+    position: relative;
+    background-color: #000;
+    flex: 1;
+    width: 100%;
+    height: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    flex-direction: row;
+}
+
+/* video-item */
+.rp-outgoing-container>.video-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.video-item.hide-video>video {
+    display: none;
+}
+
+.video-item.show-video>img, .video-item.show-video>.rp-outgoing-user {
+    display: none;
+}
+
+.clients-video-1>.video-item {
+    width: 100%;
+    height: 100%;
+}
+
+.clients-video-2>.video-item {
+    width: 50%;
+    height: 100%;
+}
+
+.clients-video-3>.video-item {
+    width: 50%;
+    height: 50%;
+}
+
+.rp-outgoing-container>.video-item>img {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    object-fit: cover;
+}
+
+.rp-outgoing-container>.video-item>.client-video {
+    width: 100%;
+    height: 100%;
+    background: #000;
+}
+
+.rp-outgoing-user>img {
+    width: 8rem;
+    height: 8rem;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+}
+
+.rp-outgoing-user>.rp-image-prev {
+    width: 120px;
+    height: 120px;
+    font-size: 30px;
+}
+
+.rp-outgoing-user>.rce-avatar-container {
+    border: solid 3px #fff;
+}
+
+.rp-calling>.rce-avatar-container {
+    animation: callingAnim 2s ease infinite;
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    -ms-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-animation: callingAnim 2s ease infinite;
+}
+
+.rp-outgoing-background {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+}
+
+.rp-outgoing-footer {
+    width: 100%;
+    padding: 30px;
+    background-color: #000;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.rp-outgoing-actions {
+    background-color: #5c5c5c94;
+    display: inline-flex;
+    border-radius: 30px;
+    -webkit-border-radius: 30px;
+    -moz-border-radius: 30px;
+    -ms-border-radius: 30px;
+    -o-border-radius: 30px;
+}
+
+.rp-outgoing-actions .rp-calling-action {
+    margin-left: 0;
+}
+
+.rp-outgoing-actions .rp-calling-action:first-child {
+    margin-right: 20px;
+
+}
+
+
+.my-video {
+    position: absolute;
+    max-width: 200px;
+    max-height: 200px;
+    top: 40px;
+    right: 40px;
+    border: 1px solid white;
+}
+
+.rp-camera-action {
+    color: white;
+    position: relative;
+}
+
+.rp-camera-container {
+    position: absolute;
+    bottom: 45px;
+    left: 0;
+    width: 220px;
+    max-height: 150px;
+    background-color: #3a3a3a;
+    overflow: hidden;
+    border-radius: 12px;
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
+    -ms-border-radius: 12px;
+    -o-border-radius: 12px;
+}
+
+.rp-camera-item {
+    font-size: 14px;
+    color: white;
+    border-bottom: 1px solid #dded;
+    padding: 5px 10px;
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+}
+
+.rp-camera-item:last-child {
+    border: none;
+}
+
+.rp-camera-item>div {
+    flex: 1;
+}

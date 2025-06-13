@@ -1,0 +1,688 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { InputText } from 'primereact/inputtext';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { Button } from 'primereact/button';
+import { Dialog } from 'primereact/dialog';
+import { MultiSelect } from 'primereact/multiselect';
+import { Calendar } from 'primereact/calendar';
+import { Card } from 'primereact/card';
+import { Badge } from 'primereact/badge';
+import { toast_success, toast_error, confirmDialog } from '../../utils';
+import {
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    ListItemAvatar,
+    Avatar,
+    List,
+    ListItem,
+    IconButton,
+    Box,
+    Typography 
+} from '@mui/material';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes, faUser } from '@fortawesome/free-solid-svg-icons';
+import {
+    getRecommendationsApi,
+    deleteRecommendationApi,
+    createRecommendationApi,
+    updateRecommendationApi
+} from '../../api/RecommendationAPI';
+import { useGlobalContext } from '../../contexts';
+import { _ERROR_CODES } from '../../config';
+import useAuth from '../../hooks/useAuth';
+
+// Days of week options
+const DAYS_OF_WEEK = [
+    { label: 'Monday', value: 'Mon' },
+    { label: 'Tuesday', value: 'Tue' },
+    { label: 'Wednesday', value: 'Wed' },
+    { label: 'Thursday', value: 'Thu' },
+    { label: 'Friday', value: 'Fri' },
+    { label: 'Saturday', value: 'Sat' },
+    { label: 'Sunday', value: 'Sun' }
+];
+
+// Helper function to parse time string into Date objects
+const parseTimeRange = (timeString) => {
+    if (typeof timeString !== 'string') return null;
+
+    const [start, end] = timeString.split('-');
+    if (!start || !end) return null;
+
+    const now = new Date();
+    const [startHours, startMinutes] = start.split(':').map(Number);
+    const [endHours, endMinutes] = end.split(':').map(Number);
+
+    const startDate = new Date(now);
+    startDate.setHours(startHours, startMinutes, 0, 0);
+
+    const endDate = new Date(now);
+    endDate.setHours(endHours, endMinutes, 0, 0);
+
+    return [startDate, endDate];
+};
+
+// Helper to format time range for display
+const formatTimeRange = (timeString) => {
+    if (!timeString) return 'Not set';
+    const [start, end] = timeString.split('-');
+    return `${start} to ${end}`;
+};
+
+const RecommendationManagement = () => {
+    const [recommendations, setRecommendations] = useState([]);
+    const [query, setQuery] = useState('');
+    const [dialogVisible, setDialogVisible] = useState(false);
+    const [editing, setEditing] = useState(null);
+    const [form, setForm] = useState({
+        title: '',
+        content: '',
+        schedules: []
+    });
+    const [participants, setParticipants] = useState([])
+    const { setLoading, confirmDialog } = useGlobalContext();
+    const { _user } = useAuth();
+    const isMounted = useRef(true);
+    const [participantsModalOpen, setParticipantsModalOpen] = useState(false);
+
+    useEffect(() => {
+        isMounted.current = true;
+        fetchRecommendations();
+        return () => {
+            isMounted.current = false;
+        };
+    }, []);
+
+    const fetchRecommendations = async () => {
+        setLoading(true);
+        try {
+            const res = await getRecommendationsApi(_user.id);
+            if (isMounted.current) {
+                setRecommendations(res || []);
+            }
+        } catch (err) {
+            if (isMounted.current) toast_error(err, _ERROR_CODES.NETWORK_ERROR);
+        } finally {
+            if (isMounted.current) setLoading(false);
+        }
+    };
+
+    const handleDelete = async (data) => {
+        const isDelete = await confirmDialog('Are you sure you want to delete this study group?');
+        if (!isDelete) {
+            return;
+        }
+        const id = data.id
+        setLoading(true);
+        try {
+            await deleteRecommendationApi(id);
+            if (isMounted.current) {
+                setRecommendations((prev) => prev.filter((r) => r.id !== id));
+                toast_success('Recommendation deleted successfully');
+            }
+        } catch (err) {
+            toast_error(err, _ERROR_CODES.NETWORK_ERROR);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const openParticipantsDialog = (data) => {
+        setParticipantsModalOpen(true)
+    }
+
+    const openCreateDialog = () => {
+        setForm({
+            title: '',
+            content: '',
+            schedules: []
+        });
+        setEditing(null);
+        setDialogVisible(true);
+    };
+
+    const openEditDialog = (rec) => {
+        const schedules = rec.schedules ? rec.schedules.map(sched => {
+            // Convert time ranges string to array of time range objects
+            const timeRanges = sched.app_schedule_times
+                ? sched.app_schedule_times.split(';').map(time => {
+                    const [start, end] = parseTimeRange(time) || [null, null];
+                    return {
+                        range: time,
+                        startTime: start,
+                        endTime: end
+                    };
+                })
+                : [];
+
+            return {
+                ...sched,
+                app_schedule_days_array: sched.app_schedule_days
+                    ? sched.app_schedule_days.split(',').filter(Boolean)
+                    : [],
+                time_ranges: timeRanges
+            };
+        }) : [];
+
+        setForm({
+            title: rec.title,
+            content: rec.content,
+            schedules
+        });
+        setEditing(rec);
+        setDialogVisible(true);
+    };
+
+    const handleScheduleChange = (index, field, value) => {
+        const updated = [...form.schedules];
+
+        if (field === 'app_schedule_days_array') {
+            // Handle days selection - store both array and comma-separated string
+            updated[index].app_schedule_days_array = value;
+            updated[index].app_schedule_days = value.map(v => v.value || v).join(',');
+        }
+        else {
+            updated[index][field] = value;
+        }
+
+        setForm({ ...form, schedules: updated });
+    };
+
+    const handleTimeRangeChange = (scheduleIndex, timeIndex, field, value) => {
+        const updated = [...form.schedules];
+
+        // Initialize time_ranges array if it doesn't exist
+        if (!updated[scheduleIndex].time_ranges) {
+            updated[scheduleIndex].time_ranges = [];
+        }
+
+        // Initialize the time range object if it doesn't exist
+        if (!updated[scheduleIndex].time_ranges[timeIndex]) {
+            updated[scheduleIndex].time_ranges[timeIndex] = {};
+        }
+
+        updated[scheduleIndex].time_ranges[timeIndex][field] = value;
+
+        // Update the range string when both times are set
+        const timeRange = updated[scheduleIndex].time_ranges[timeIndex];
+        if (timeRange.startTime && timeRange.endTime) {
+            const start = timeRange.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            const end = timeRange.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            timeRange.range = `${start}-${end}`;
+        }
+
+        // Update the schedule times string
+        updated[scheduleIndex].app_schedule_times = updated[scheduleIndex].time_ranges
+            .filter(tr => tr.range)
+            .map(tr => tr.range)
+            .join(';');
+
+        setForm({ ...form, schedules: updated });
+    };
+
+    const handleRemoveTimeRange = (scheduleIndex, timeIndex) => {
+        const updated = [...form.schedules];
+        updated[scheduleIndex].time_ranges.splice(timeIndex, 1);
+        updated[scheduleIndex].app_schedule_times = updated[scheduleIndex].time_ranges
+            .filter(tr => tr.range)
+            .map(tr => tr.range)
+            .join(';');
+        setForm({ ...form, schedules: updated });
+    };
+
+    const handleAddSchedule = () => {
+        setForm({
+            ...form,
+            schedules: [...form.schedules, {
+                app_packages: '',
+                app_schedule_days: '',
+                app_schedule_days_array: [],
+                app_schedule_times: '',
+                time_ranges: []
+            }]
+        });
+    };
+
+    const handleAddTimeRange = (scheduleIndex) => {
+        const updated = [...form.schedules];
+        if (!updated[scheduleIndex].time_ranges) {
+            updated[scheduleIndex].time_ranges = [];
+        }
+        updated[scheduleIndex].time_ranges.push({
+            startTime: null,
+            endTime: null,
+            range: ''
+        });
+        setForm({ ...form, schedules: updated });
+    };
+
+    const handleRemoveSchedule = (index) => {
+        const updated = form.schedules.filter((_, i) => i !== index);
+        setForm({ ...form, schedules: updated });
+    };
+
+    const handleSave = async () => {
+        // Validate required fields
+        if (!form.title || !form.content) {
+            toast_error('Title and content are required');
+            return;
+        }
+
+        // Validate schedules
+        for (const sched of form.schedules) {
+            if (!sched.app_packages || !sched.app_schedule_days || !sched.app_schedule_times) {
+                toast_error('All schedule fields are required');
+                return;
+            }
+
+            if (sched.time_ranges.length === 0) {
+                toast_error('At least one time range is required for each schedule');
+                return;
+            }
+        }
+
+        setLoading(true);
+        try {
+            const payload = {
+                title: form.title,
+                content: form.content,
+                schedules: form.schedules.map(sched => ({
+                    app_packages: sched.app_packages,
+                    app_schedule_days: sched.app_schedule_days,
+                    app_schedule_times: sched.app_schedule_times
+                }))
+            };
+
+            if (!editing) {
+                payload.researcher_id = _user.id;
+                await createRecommendationApi(payload);
+                toast_success('Recommendation created');
+            } else {
+                await updateRecommendationApi(editing.id, payload);
+                toast_success('Recommendation updated');
+            }
+
+            setDialogVisible(false);
+            fetchRecommendations();
+        } catch (err) {
+            toast_error(err, _ERROR_CODES.NETWORK_ERROR);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const renderStatus = (rowData) => {
+        const status = rowData.status || 'draft';
+        const severity = status === 'sent' ? 'success' : 'info';
+        return <Badge value={status} severity={severity} />;
+    };
+
+    const actionButtons = (rowData) => (
+        <div className="flex gap-2">
+            <Button
+                icon="pi pi-send"
+                className="p-button-success p-button-sm"
+                tooltip="Send to Participant"
+                tooltipOptions={{ position: 'top' }}
+                onClick={() => openParticipantsDialog(rowData)}
+                style={{ marginRight: '5px' }}
+            />
+            <Button
+                icon="pi pi-pencil"
+                className="p-button-sm"
+                tooltip="Edit category"
+                tooltipOptions={{ position: 'top' }}
+                onClick={() => openEditDialog(rowData)}
+                style={{ marginRight: '5px' }}
+            />
+            <Button
+                icon="pi pi-trash"
+                className="p-button-danger p-button-sm"
+                tooltip="Delete category"
+                tooltipOptions={{ position: 'top' }}
+                onClick={() => handleDelete(rowData)}
+            />
+        </div>
+    );
+    // const renderActions = (rowData) => (
+    //     <div className="flex gap-2">
+    //         <Button
+    //             icon="pi pi-pencil"
+    //             className="p-button-rounded p-button-sm p-button-text p-button-secondary"
+    //             onClick={() => openEditDialog(rowData)}
+    //             tooltip="Edit"
+    //         />
+    //         <Button
+    //             icon="pi pi-trash"
+    //             className="p-button-rounded p-button-sm p-button-text p-button-danger"
+    //             onClick={() => handleDelete(rowData.id)}
+    //             tooltip="Delete"
+    //         />
+    //     </div>
+    // );
+
+    const renderContentPreview = (content) => {
+        return content.length > 50 ? `${content.substring(0, 50)}...` : content;
+    };
+
+
+    return (
+        <div className="p-4">
+            <div className="p-4">
+                <h3 className="mb-4">Recommendation Management</h3>
+                <DataTable
+                    value={recommendations}
+                    paginator
+                    stripedRows
+                    rows={10}
+                    columnResizeMode="fit"
+                    showGridlines
+                    responsiveLayout="scroll"
+                    filters={{ global: { value: query, matchMode: 'contains' } }}
+                    emptyMessage="No recommendations found."
+                    className="p-datatable-sm"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+                    rowsPerPageOptions={[10, 20, 50]}
+                    header={
+                        <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                            <div className="flex gap-2">
+                                <button
+                                    className='btn btn-primary'
+                                    onClick={openCreateDialog}
+                                ><i className='fa fa-plus'></i> New Recommendation</button>
+                            </div>
+                            <span className="p-input-icon-left">
+                                <i className="pi pi-search" />
+                                <InputText
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    placeholder="Search recommendations..."
+                                    className="w-full"
+                                />
+                            </span>
+                        </div>
+                    }
+                >
+                    <Column header="No" body={(_, { rowIndex }) => rowIndex + 1} style={{ width: '50px' }} />
+                    <Column field="title" header="Title" sortable />
+                    <Column
+                        field="content"
+                        header="Content"
+                        body={(row) => renderContentPreview(row.content)}
+                    />
+                    <Column
+                        field="status"
+                        header="Status"
+                        body={renderStatus}
+                        style={{ width: '120px' }}
+                    />
+                    <Column
+                        header="Actions"
+                        body={actionButtons}
+                        style={{ width: '180px' }}
+                        align="center"
+                    />
+                </DataTable>
+            </div>
+
+            <Dialog
+                header={editing ? 'Edit Recommendation' : 'New Recommendation'}
+                visible={dialogVisible}
+                style={{ width: '50vw', minWidth: '400px', maxWidth: '700px' }}
+                onHide={() => setDialogVisible(false)}
+                className="p-fluid"
+                breakpoints={{ '960px': '75vw', '640px': '90vw' }}
+                modal
+            >
+                <div className="flex flex-col gap-4 p-4">
+                    {/* Title */}
+                    <div className="field">
+                        <label htmlFor="title" className="font-medium text-sm text-gray-600 mb-1 block">
+                            Title <span className="text-red-500">*</span>
+                        </label>
+                        <InputText
+                            id="title"
+                            value={form.title}
+                            onChange={(e) => setForm({ ...form, title: e.target.value })}
+                            className="w-full"
+                            placeholder="Enter recommendation title"
+                            required
+                        />
+                    </div>
+
+                    {/* Content */}
+                    <div className="field">
+                        <label htmlFor="content" className="font-medium text-sm text-gray-600 mb-1 block">
+                            Content <span className="text-red-500">*</span>
+                        </label>
+                        <InputTextarea
+                            id="content"
+                            value={form.content}
+                            onChange={(e) => setForm({ ...form, content: e.target.value })}
+                            className="w-full"
+                            rows={1}
+                            placeholder="Enter detailed recommendation content"
+                            autoResize
+                            required
+                        />
+                    </div>
+
+                    {/* Schedule Section */}
+                    <div className="">
+                        <div className="flex justify-between items-center mb-3">
+                            <Button
+                                label="Add Schedule"
+                                icon="pi pi-plus"
+                                className="p-button-sm p-button-outlined"
+                                onClick={handleAddSchedule}
+                            />
+                        </div>
+
+                        {form.schedules.length === 0 && (
+                            <div className="p-4 mb-3 border border-dashed border-gray-300 rounded-md bg-gray-50 text-center">
+                                <i className="pi pi-inbox text-2xl text-gray-400 mb-2" />
+                                <p className="text-sm text-gray-500">No schedules added yet</p>
+                            </div>
+                        )}
+
+                        <div className="space-y-3">
+                            {form.schedules.map((sched, schedIdx) => (
+                                <Card
+                                    key={`sched-${schedIdx}`}
+                                    className="border border-gray-200 rounded-md bg-white shadow-xs"
+                                >
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
+                                            <Button
+                                                icon="pi pi-times"
+                                                className="p-button-rounded p-button-text"
+                                                onClick={() => handleRemoveSchedule(schedIdx)}
+                                                tooltip="Remove this schedule"
+                                            />
+                                        </div>
+
+                                        <div className="field">
+                                            <label className="block text-sm font-medium text-gray-600 mb-1">
+                                                App Package <span className="text-red-500">*</span>
+                                            </label>
+                                            <InputText
+                                                value={sched.app_packages}
+                                                onChange={(e) => handleScheduleChange(schedIdx, 'app_packages', e.target.value)}
+                                                className="w-full"
+                                                placeholder="com.example.app"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="field">
+                                            <label className="block text-sm font-medium text-gray-600 mb-1">
+                                                Days <span className="text-red-500">*</span>
+                                            </label>
+                                            <MultiSelect
+                                                value={sched.app_schedule_days_array || []}
+                                                options={DAYS_OF_WEEK}
+                                                onChange={(e) => handleScheduleChange(schedIdx, 'app_schedule_days_array', e.value)}
+                                                optionLabel="label"
+                                                display="chip"
+                                                placeholder="Select days"
+                                                className="w-full"
+                                                required
+                                            />
+                                            <small className="text-xs text-gray-500">
+                                                Selected: {sched.app_schedule_days || 'None'}
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    {/* Time Ranges Section */}
+                                    <div className="mt-4">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <button
+                                                className="btn btn-primary"
+                                                onClick={() => handleAddTimeRange(schedIdx)}>
+                                                + Add Time Range
+                                            </button>
+                                        </div>
+
+                                        {(!sched.time_ranges || sched.time_ranges.length === 0) && (
+                                            <div className="p-3 mb-2 border border-dashed border-gray-300 rounded-md bg-gray-50 text-center">
+                                                <p className="text-sm text-gray-500">No time ranges added yet</p>
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-2">
+                                            {sched.time_ranges?.map((timeRange, timeIdx) => (
+                                                <div key={`time-${schedIdx}-${timeIdx}`}>
+                                                    <div style={{ display: 'flex', alignContent: 'spaceBetween' }}>
+                                                        <Calendar
+                                                            value={timeRange.startTime}
+                                                            onChange={(e) => handleTimeRangeChange(schedIdx, timeIdx, 'startTime', e.value)}
+                                                            timeOnly
+                                                            showTime
+                                                            hourFormat="24"
+                                                            placeholder="Start Time"
+                                                            className="w-full"
+                                                        />
+                                                        <div style={{ margin: 'auto', padding: '2px' }}
+                                                        > to </div>
+                                                        <Calendar
+                                                            value={timeRange.endTime}
+                                                            onChange={(e) => handleTimeRangeChange(schedIdx, timeIdx, 'endTime', e.value)}
+                                                            timeOnly
+                                                            showTime
+                                                            hourFormat="24"
+                                                            placeholder="End Time"
+                                                            className="w-full"
+                                                            width={'80%'}
+                                                        />
+                                                        <button
+                                                            className="btn btn-danger"
+                                                            onClick={() => handleRemoveTimeRange(schedIdx, timeIdx)}
+                                                            tooltip="Remove this time range"
+                                                            style={{ margin: '2px' }}
+                                                        ><i className="fa fa-trash"></i></button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <small className="text-xs text-gray-500 block mt-2">
+                                            Current: {sched.time_ranges?.map(tr => formatTimeRange(`${tr.range || 'Not set'}`)).join('; ') || 'None'}
+                                        </small>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Dialog Footer */}
+                    <div className='mt-3' style={{ display: 'flex', flexDirection: 'row-reverse' }}>
+                        <button
+                            className="btn btn-danger"
+                            onClick={() => setDialogVisible(false)}
+                            style={{ margin: '5px' }}
+                        >Cancel</button>
+                        <button
+                            className="btn btn-primary"
+                            onClick={handleSave}
+                            style={{ margin: '5px' }}
+                            disabled={!form.title || form.schedules.some(s => !s.app_packages || !s.app_schedule_days || !s.time_ranges || s.time_ranges.length === 0)}
+                        >
+                            {editing ? "Update" : "Save"}
+                        </button>
+                    </div>
+                </div>
+            </Dialog >
+
+
+            {/* Particiapnts show modal */}
+            <Dialog
+                visible={participantsModalOpen} // Use 'visible' instead of 'open'
+                onHide={() => setParticipantsModalOpen(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Typography variant="h6">
+                            Send Recommendation
+                        </Typography>
+                        <IconButton onClick={() => setParticipantsModalOpen(false)}>
+                            <FontAwesomeIcon icon={faTimes} />
+                        </IconButton>
+                    </Box>
+                </DialogTitle>
+
+                <DialogContent dividers>
+                    <List disablePadding>
+                        {participants?.length ? (
+                            participants.map((participant, idx) => (
+                                <div key={participant.id}>
+                                    <ListItem
+                                        secondaryAction={
+                                            <Button
+                                                onClick={() => handleSendRecommendation(participant.id)}
+                                                variant="contained"
+                                                size="small"
+                                                color="primary"
+                                                sx={{ minWidth: 100 }}
+                                            >
+                                                {'Send'}
+                                            </Button>
+                                        }
+                                    >
+                                        <ListItemAvatar>
+                                            <Avatar>
+                                                <FontAwesomeIcon icon={faUser} />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                    </ListItem>
+                                    {idx < participants.length - 1 && (
+                                        <Divider component="li" />
+                                    )}
+                                </div>
+                            ))
+                        ) : (
+                            <Typography sx={{ mt: 2 }}>
+                                No participants or pending invitations.
+                            </Typography>
+                        )}
+                    </List>
+                </DialogContent>
+
+                <DialogActions>
+                    <Button onClick={() => setParticipantsModalOpen(false)} color="primary">
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+
+        </div >
+    );
+};
+
+export default RecommendationManagement;

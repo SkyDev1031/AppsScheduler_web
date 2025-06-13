@@ -1,0 +1,77 @@
+// Narrow the Actions column
+.p-datatable {
+    .p-column-header-actions {
+      width: 80px !important; // Force the width adjustment
+    }
+  }
+  
+  // Style for the three-dot icon button and variations
+  .p-button {
+    &-rounded {
+      &.p-button-text {
+        color: #007bff !important;
+        background-color: transparent !important;
+        border: none !important;
+        font-size: 1.2rem !important;
+        cursor: pointer !important;
+  
+        &:hover {
+          color: #0056b3 !important; // Darker color on hover
+        }
+      }
+  
+      &.p-button-text.p-button-icon-only {
+        color: #007bff !important;
+        background-color: #e9ecef !important;
+        border: none !important;
+        font-size: 1.2rem !important;
+        cursor: pointer !important;
+  
+        &:hover {
+          color: #0056b3 !important;
+          background-color: #bad6f1 !important;
+          border-radius: 50% !important;
+        }
+  
+        &:active {
+          color: #ffffff !important;
+          background-color: #007bff !important;
+        }
+      }
+    }
+  }
+  
+  // Style the Menu container
+  .p-menu {
+    background-color: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 5px !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  
+    .p-menuitem {
+      color: #007bff !important;
+      font-weight: 500 !important;
+      padding: 10px 15px !important;
+      cursor: pointer !important;
+  
+      &:hover {
+        background-color: #e9ecef !important;
+        color: #0056b3 !important;
+      }
+  
+      &-active {
+        background-color: #007bff !important;
+        color: #ffffff !important;
+      }
+  
+      &-icon {
+        color: #007bff !important;
+        margin-right: 10px !important;
+  
+        &[style] {
+          color: inherit !important;
+        }
+      }
+    }
+  }
+  
