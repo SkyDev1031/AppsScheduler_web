@@ -576,6 +576,7 @@ class AppController extends Controller
             'phonenumber' => $request->phonenumber,
             'userID' => $request->userID ?? $request->username,
             'app_name' => $request->appName,
+            'app_package_name' => $request->appPackageName,
             'app_start_time' => $request->appStartTime,
             'app_end_time' => $request->appEndTime,
             'app_duration' => $request->appDuration,

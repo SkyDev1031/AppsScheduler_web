@@ -13,6 +13,7 @@ class AppUseInfo extends Model
         'phonenumber',
         'userID',
         'app_name',
+        'app_package_name',
         'app_start_time',
         'app_end_time',
         'app_duration',

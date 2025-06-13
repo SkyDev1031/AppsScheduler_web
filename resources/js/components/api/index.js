@@ -32,7 +32,7 @@ export const _REQUEST_APP = (url, method, data) => {
     });
 }
 export const _REQUEST = (url, method, data = {}) => {
-    console.log(`${window.location.origin}/api/app/${url}`);
+    console.log(`${window.location.origin}/api/${url}`);
 
     return new Promise((resolve, reject) => {
         const axiosMethods = {

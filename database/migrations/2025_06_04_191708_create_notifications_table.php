@@ -9,6 +9,7 @@ class CreateNotificationsTable extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->id('id'); // Primary key
+            $table->id('id_appuser'); // Primary key
             $table->string('title');        // Notification title
             $table->text('content');        // Notification content
             $table->boolean('read_status')->default(false); // Whether notification is read

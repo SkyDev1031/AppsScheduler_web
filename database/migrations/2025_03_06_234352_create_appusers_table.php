@@ -20,7 +20,6 @@ class CreateAppusersTable extends Migration
             $table->string('password');
             $table->enum('status', ['Pending', 'Active', 'Disenrolled'])->default('Pending');
             $table->string('fcm_token')->nullable();
-            $table->foreignId('study_id')->nullable()->constrained('studies')->onDelete('set null');
             $table->timestamps();
         });
     }

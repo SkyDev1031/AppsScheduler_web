@@ -18,6 +18,7 @@ class CreateAppUseInfosTable extends Migration
             $table->string('phonenumber', 20);
             $table->string('userID', 50);
             $table->string('app_name', 100);
+            $table->string('app_package_name', 100);
             $table->dateTime('app_start_time');
             $table->dateTime('app_end_time');
             $table->time('app_duration');

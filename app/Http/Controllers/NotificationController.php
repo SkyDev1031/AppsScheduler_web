@@ -44,7 +44,7 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $userId = $request->user_id;
-        // return $request;
+        return $request;
         if (!$userId) {
             // Return all notifications joined with appusers
             $notifications = DB::table('notifications')
@@ -98,7 +98,7 @@ class NotificationController extends Controller
         ]);
     
         $validated['accept_time'] = now();
-    
+        // print_r($validated);
         try {
             $notification = Notification::create($validated);
     
@@ -145,6 +145,7 @@ class NotificationController extends Controller
                 'success' => true,
             ], 200);
         } catch (\Exception $e) {
+            print_r($e->getMessage());
             return response()->json([
                 'message' => 'There was a problem creating the notification. Please try again.',
                 'success' => false,

@@ -13,9 +13,10 @@ class AppUserFactory extends Factory
     public function definition()
     {
         return [
-            'username' => $this->faker->unique()->userName,
+            'userID' => $this->faker->unique()->userID,
             'phonenumber' => $this->faker->unique()->phoneNumber(),
             'password' => bcrypt('password123'), // You can change this to a hashed password
+            'status' => $this->faker->randomElement(['Pending', 'Active', 'Disenrolled']),
         ];
     }
 }
