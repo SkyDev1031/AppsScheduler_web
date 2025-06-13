@@ -1,7 +1,13 @@
 /node_modules
-/public/hot
-/public/storage
+/public/css
+/public/js
+/public/fonts
+/public/images
+/public/uploads
 /storage/*.key
+/storage/framework
+/storage/app/public
+/bootstrap/cache
 /vendor
 .env
 .env.backup
@@ -13,6 +19,5 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
-/public/uploads
-/public/js/*.*
-/public
+package-lock.json
+composer.lock

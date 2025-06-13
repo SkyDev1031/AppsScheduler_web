@@ -171,7 +171,7 @@ const NotificationManagement = () => {
                     <div className='d-flex'>
                         <div className="me-auto p-2">
                             <button label='Reload' onClick={fetchNotifications} className="btn btn-default"><i className='fa fa-refresh' /> Reload</button>
-							<button onClick={createNotification} className="btn btn-default">Test Create</button>
+					        {/* <button onClick={createNotification} className="btn btn-default">Test Create</button> */}
                         </div>
                         <div className="p-2">
                             <span className="p-input-icon-left">
