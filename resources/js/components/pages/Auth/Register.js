@@ -54,8 +54,9 @@ const Register = (props) => {
         else if (!validateEmail(email)) toast_error('Put vaild email address', _ERROR_CODES.INVALID_INPUT);
         else if (!screenName) toast_error('Put your screenName', _ERROR_CODES.INVALID_INPUT);
         else if (!password) toast_error('Put your password', _ERROR_CODES.INVALID_INPUT);
+        else if (password.length <= 5) toast_error('Password must be larger than 5 characters', _ERROR_CODES.INVALID_INPUT);
         else if (!secPassword) toast_error('Put your secondary password', _ERROR_CODES.INVALID_INPUT);
-        else if (!captureValue) toast_error('Please check reCAPTCHA', _ERROR_CODES.INVALID_INPUT);
+        // else if (!captureValue) toast_error('Please check reCAPTCHA', _ERROR_CODES.INVALID_INPUT);
         else {
             try {
                 const data = { email, screenName, password, secPassword, key };
@@ -162,9 +163,9 @@ const Register = (props) => {
                                             &nbsp;&nbsp;I agree To the <a href="#">Terms Of Use</a>
                                         </span>
                                     </div>
-                                    <Captcha
+                                    {/* <Captcha
                                         siteKey={SITE_KEY}
-                                        onResponse={({ response }) => setCaptureValue(response)} />
+                                        onResponse={({ response }) => setCaptureValue(response)} /> */}
                                     <button onClick={onRegister} className="cmn-btn w-100 mt-4">Join Now</button>
                                 </div>
                             </div>
