@@ -13,20 +13,22 @@ use App\Services\FirebaseNotificationService;
 class SendStudyNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    protected $token, $title, $message, $studyId;
+    protected $token, $title, $message, $studyId, $actionType, $payload;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($token, $title, $message, $studyId = 0)
+    public function __construct($token, $title, $message, $studyId = 0, $actionType = 'notification', $payload = ["title" => 'title', "body" => 'Hello World'])
     {
         //
         $this->token = $token;
         $this->title = $title;
         $this->message = $message;
         $this->studyId = $studyId;
+        $this->actionType = $actionType;
+        $this->payload = $payload;
     }
 
     /**
@@ -41,7 +43,9 @@ class SendStudyNotification implements ShouldQueue
             $this->token,
             $this->title,
             $this->message,
-            $this->studyId
+            $this->studyId,
+            $this->actionType,
+            $this->payload
         );
     }
 }

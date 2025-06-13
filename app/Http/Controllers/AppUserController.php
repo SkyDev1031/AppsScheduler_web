@@ -115,7 +115,7 @@ class AppUserController extends Controller
                 $appUser = AppUser::find($id);
 
                 if ($appUser) {
-                    $appUser->status = 'active';
+                    $appUser->status = 'Active';
                     $appUser->save();
 
                     // Retrieve the fcm_token and send notification
@@ -236,7 +236,7 @@ class AppUserController extends Controller
 
     public function sendNotification(Request $request)
     {
-        $id = $request->appUserID || $request->id;
+        $id = $request->appUserID ?? $request->id;
         $title = $request->title;
         $content = $request->content;
     
@@ -259,7 +259,7 @@ class AppUserController extends Controller
             if (!$fcmToken) {
                 return response()->json(['error' => 'FCM token not found for the specified user.'], 400);
             }
-    
+            
             // Dispatch the job to send the notification
             SendStudyNotification::dispatch($fcmToken, $title, $content);
     
