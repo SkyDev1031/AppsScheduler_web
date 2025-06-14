@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Http; // Import Http for making HTTP requests
 use Google\Client; // Import the Google Client class for Firebase
 use Illuminate\Http\Request;
 use App\Models\AppUser; // Import the AppUser model
-use App\Jobs\SendStudyNotification;
+use App\Jobs\SendPushNotification;
 use Google\Service\Monitoring\SendNotificationChannelVerificationCodeRequest;
 use App\Models\StudyParticipantRequest; // Import the StudyParticipantRequest model
 
@@ -121,7 +121,7 @@ class AppUserController extends Controller
                     // Retrieve the fcm_token and send notification
                     $fcmToken = $appUser->fcm_token;
                     if ($fcmToken) {
-                        SendStudyNotification::dispatch($fcmToken, 'Account Activated', 'Your account has been activated.');
+                        SendPushNotification::dispatch($fcmToken, 'Account Activated', 'Your account has been activated.', 0, "account-activated");
                     } else {
                         Log::warning("FCM token not found for user {$appUser->userID}");
                     }
@@ -156,7 +156,7 @@ class AppUserController extends Controller
                     // Retrieve the fcm_token and send notification
                     $fcmToken = $appUser->fcm_token;
                     if ($fcmToken) {
-                        SendStudyNotification::dispatch($fcmToken, 'Account disenrolled', 'Your account has been disenrolled.');
+                        SendPushNotification::dispatch($fcmToken, 'Account disenrolled', 'Your account has been disenrolled.', 0, "account-disenrolled");
                     } else {
                         Log::warning("FCM token not found for user {$appUser->userID}");
                     }
@@ -191,7 +191,7 @@ class AppUserController extends Controller
 
                     // Send notification using the retrieved fcm_token
                     if ($fcmToken) {
-                        SendStudyNotification::dispatch($fcmToken, 'Account Deleted', 'Your account has been deleted.');
+                        SendPushNotification::dispatch($fcmToken, 'Account Deleted', 'Your account has been deleted.', 0, "account-deleted");
                     }
 
                     Log::info("App user with ID {$id} has been deleted.");
@@ -261,7 +261,7 @@ class AppUserController extends Controller
             }
             
             // Dispatch the job to send the notification
-            SendStudyNotification::dispatch($fcmToken, $title, $content);
+            SendPushNotification::dispatch($fcmToken, $title, $content);
     
             return response()->json(['message' => 'Notification sent successfully.'], 200);
         } catch (\Exception $e) {

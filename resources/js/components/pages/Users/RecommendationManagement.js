@@ -10,25 +10,14 @@ import { Calendar } from 'primereact/calendar';
 import { Card } from 'primereact/card';
 import { Badge } from 'primereact/badge';
 import { toast_success, toast_error, confirmDialog } from '../../utils';
-import {
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    ListItemAvatar,
-    Avatar,
-    List,
-    ListItem,
-    IconButton,
-    Box,
-    Typography 
-} from '@mui/material';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faUser } from '@fortawesome/free-solid-svg-icons';
+import StudyParticipantsModal from './StudyParticipantsModal';
 import {
     getRecommendationsApi,
     deleteRecommendationApi,
     createRecommendationApi,
-    updateRecommendationApi
+    updateRecommendationApi,
+    getAppPackagesApi,
+    sendToParticipantsApi
 } from '../../api/RecommendationAPI';
 import { useGlobalContext } from '../../contexts';
 import { _ERROR_CODES } from '../../config';
@@ -36,13 +25,13 @@ import useAuth from '../../hooks/useAuth';
 
 // Days of week options
 const DAYS_OF_WEEK = [
-    { label: 'Monday', value: 'Mon' },
-    { label: 'Tuesday', value: 'Tue' },
-    { label: 'Wednesday', value: 'Wed' },
-    { label: 'Thursday', value: 'Thu' },
-    { label: 'Friday', value: 'Fri' },
-    { label: 'Saturday', value: 'Sat' },
-    { label: 'Sunday', value: 'Sun' }
+    { label: 'Monday', value: '1' },
+    { label: 'Tuesday', value: '2' },
+    { label: 'Wednesday', value: '3' },
+    { label: 'Thursday', value: '4' },
+    { label: 'Friday', value: '5' },
+    { label: 'Saturday', value: '6' },
+    { label: 'Sunday', value: '7' }
 ];
 
 // Helper function to parse time string into Date objects
@@ -82,15 +71,17 @@ const RecommendationManagement = () => {
         content: '',
         schedules: []
     });
-    const [participants, setParticipants] = useState([])
-    const { setLoading, confirmDialog } = useGlobalContext();
+    const [availableAppPackages, setAvailableAppPackages] = useState([]);
+    const [appPackageSearch, setAppPackageSearch] = useState('');
+    const { setLoading, confirmDialog: globalConfirmDialog } = useGlobalContext();
     const { _user } = useAuth();
     const isMounted = useRef(true);
     const [participantsModalOpen, setParticipantsModalOpen] = useState(false);
-
+    const [selectedRecommendations, setSelectedRecommendations] = useState([]);
     useEffect(() => {
         isMounted.current = true;
         fetchRecommendations();
+        fetchAppPackages();
         return () => {
             isMounted.current = false;
         };
@@ -110,12 +101,30 @@ const RecommendationManagement = () => {
         }
     };
 
+    const fetchAppPackages = async () => {
+        try {
+            const res = await getAppPackagesApi();
+            if (isMounted.current) {
+                setAvailableAppPackages(
+                    res.packages
+                        .filter(pkg => pkg.value != null) // Filter out null/undefined
+                        .map(pkg => ({
+                            label: pkg.label,
+                            value: pkg.value
+                        }))
+                );
+            }
+        } catch (err) {
+            console.error('Failed to fetch app packages:', err);
+        }
+    };
+
     const handleDelete = async (data) => {
-        const isDelete = await confirmDialog('Are you sure you want to delete this study group?');
+        const isDelete = await globalConfirmDialog('Are you sure you want to delete this study group?');
         if (!isDelete) {
             return;
         }
-        const id = data.id
+        const id = data.id;
         setLoading(true);
         try {
             await deleteRecommendationApi(id);
@@ -129,11 +138,31 @@ const RecommendationManagement = () => {
             setLoading(false);
         }
     };
-    
-    const openParticipantsDialog = (data) => {
-        setParticipantsModalOpen(true)
-    }
 
+    const openParticipantsDialog = (selectedRecommendations) => {
+        setParticipantsModalOpen(true);
+    };
+
+    const handleSendRecommendation = async (participants) => {
+        if (selectedRecommendations.length === 0 || participants.length === 0) {
+            toast_error('Please select recommendations and participants.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // Iterate over selected recommendations and participants
+            const res = await sendToParticipantsApi(participants, selectedRecommendations);
+
+            toast_success('Recommendations sent successfully.');
+            setParticipantsModalOpen(false); // Close the modal after sending
+        } catch (error) {
+            console.error('Error sending recommendations:', error);
+            toast_error('Failed to send recommendations.');
+        } finally {
+            setLoading(false);
+        }
+    };
     const openCreateDialog = () => {
         setForm({
             title: '',
@@ -146,9 +175,16 @@ const RecommendationManagement = () => {
 
     const openEditDialog = (rec) => {
         const schedules = rec.schedules ? rec.schedules.map(sched => {
+            // Convert app packages string to array
+            const appPackages = sched.app_packages
+                ? sched.app_packages.split(',').filter(Boolean).map(pkgValue => {
+                    return pkgValue
+                })
+                : [];
             // Convert time ranges string to array of time range objects
+
             const timeRanges = sched.app_schedule_times
-                ? sched.app_schedule_times.split(';').map(time => {
+                ? sched.app_schedule_times.split(',').map(time => {
                     const [start, end] = parseTimeRange(time) || [null, null];
                     return {
                         range: time,
@@ -158,13 +194,17 @@ const RecommendationManagement = () => {
                 })
                 : [];
 
-            return {
+            const data = {
                 ...sched,
+                app_packages_array: appPackages,
                 app_schedule_days_array: sched.app_schedule_days
-                    ? sched.app_schedule_days.split(',').filter(Boolean)
+                    ? sched.app_schedule_days.split('_').filter(Boolean)
                     : [],
                 time_ranges: timeRanges
-            };
+            }
+            console.log("Selected packages:", data.app_packages_array);
+            console.log("Available options:", availableAppPackages);
+            return data;
         }) : [];
 
         setForm({
@@ -180,9 +220,12 @@ const RecommendationManagement = () => {
         const updated = [...form.schedules];
 
         if (field === 'app_schedule_days_array') {
-            // Handle days selection - store both array and comma-separated string
             updated[index].app_schedule_days_array = value;
-            updated[index].app_schedule_days = value.map(v => v.value || v).join(',');
+            updated[index].app_schedule_days = value.map(v => v.value || v).join('_');
+        }
+        else if (field === 'app_packages_array') {
+            updated[index].app_packages_array = value;
+            updated[index].app_packages = value.map(v => v.value || v).join(',');
         }
         else {
             updated[index][field] = value;
@@ -194,31 +237,30 @@ const RecommendationManagement = () => {
     const handleTimeRangeChange = (scheduleIndex, timeIndex, field, value) => {
         const updated = [...form.schedules];
 
-        // Initialize time_ranges array if it doesn't exist
         if (!updated[scheduleIndex].time_ranges) {
             updated[scheduleIndex].time_ranges = [];
         }
 
-        // Initialize the time range object if it doesn't exist
         if (!updated[scheduleIndex].time_ranges[timeIndex]) {
             updated[scheduleIndex].time_ranges[timeIndex] = {};
         }
 
         updated[scheduleIndex].time_ranges[timeIndex][field] = value;
 
-        // Update the range string when both times are set
         const timeRange = updated[scheduleIndex].time_ranges[timeIndex];
         if (timeRange.startTime && timeRange.endTime) {
-            const start = timeRange.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-            const end = timeRange.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-            timeRange.range = `${start}-${end}`;
+            const timeRange = updated[scheduleIndex].time_ranges[timeIndex];
+            if (timeRange.startTime && timeRange.endTime) {
+                const start = timeRange.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', ' : ');
+                const end = timeRange.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', ' : ');
+                timeRange.range = `${start} - ${end}`;
+            }
         }
 
-        // Update the schedule times string
         updated[scheduleIndex].app_schedule_times = updated[scheduleIndex].time_ranges
             .filter(tr => tr.range)
             .map(tr => tr.range)
-            .join(';');
+            .join(',');
 
         setForm({ ...form, schedules: updated });
     };
@@ -229,7 +271,7 @@ const RecommendationManagement = () => {
         updated[scheduleIndex].app_schedule_times = updated[scheduleIndex].time_ranges
             .filter(tr => tr.range)
             .map(tr => tr.range)
-            .join(';');
+            .join(',');
         setForm({ ...form, schedules: updated });
     };
 
@@ -238,6 +280,7 @@ const RecommendationManagement = () => {
             ...form,
             schedules: [...form.schedules, {
                 app_packages: '',
+                app_packages_array: [],
                 app_schedule_days: '',
                 app_schedule_days_array: [],
                 app_schedule_times: '',
@@ -265,15 +308,14 @@ const RecommendationManagement = () => {
     };
 
     const handleSave = async () => {
-        // Validate required fields
         if (!form.title || !form.content) {
             toast_error('Title and content are required');
             return;
         }
 
-        // Validate schedules
         for (const sched of form.schedules) {
-            if (!sched.app_packages || !sched.app_schedule_days || !sched.app_schedule_times) {
+            if (!sched.app_packages || sched.app_packages_array.length === 0 ||
+                !sched.app_schedule_days || !sched.app_schedule_times) {
                 toast_error('All schedule fields are required');
                 return;
             }
@@ -322,14 +364,14 @@ const RecommendationManagement = () => {
 
     const actionButtons = (rowData) => (
         <div className="flex gap-2">
-            <Button
+            {/* <Button
                 icon="pi pi-send"
                 className="p-button-primary p-button-sm"
                 tooltip="Send to Participant"
                 tooltipOptions={{ position: 'top' }}
                 onClick={() => openParticipantsDialog(rowData)}
                 style={{ marginRight: '5px' }}
-            />
+            /> */}
             <Button
                 icon="pi pi-pencil"
                 className="p-button-sm"
@@ -347,27 +389,10 @@ const RecommendationManagement = () => {
             />
         </div>
     );
-    // const renderActions = (rowData) => (
-    //     <div className="flex gap-2">
-    //         <Button
-    //             icon="pi pi-pencil"
-    //             className="p-button-rounded p-button-sm p-button-text p-button-secondary"
-    //             onClick={() => openEditDialog(rowData)}
-    //             tooltip="Edit"
-    //         />
-    //         <Button
-    //             icon="pi pi-trash"
-    //             className="p-button-rounded p-button-sm p-button-text p-button-danger"
-    //             onClick={() => handleDelete(rowData.id)}
-    //             tooltip="Delete"
-    //         />
-    //     </div>
-    // );
 
     const renderContentPreview = (content) => {
         return content.length > 50 ? `${content.substring(0, 50)}...` : content;
     };
-
 
     return (
         <div className="p-4">
@@ -386,13 +411,25 @@ const RecommendationManagement = () => {
                     className="p-datatable-sm"
                     currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
                     rowsPerPageOptions={[10, 20, 50]}
+                    selection={selectedRecommendations}
+                    onSelectionChange={(e) => setSelectedRecommendations(e.value)}
                     header={
                         <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
                             <div className="flex gap-2">
                                 <button
-                                    className='btn btn-primary'
+                                    className="btn btn-primary"
                                     onClick={openCreateDialog}
-                                ><i className='fa fa-plus'></i> New Recommendation</button>
+                                >
+                                    <i className="fa fa-plus"></i> New Recommendation
+                                </button>
+                                <button
+                                    className="btn btn-success"
+                                    onClick={() => openParticipantsDialog(selectedRecommendations)}
+                                    disabled={selectedRecommendations.length === 0}
+                                    style={{ marginLeft: '10px' }}
+                                >
+                                    <i className="fa fa-send"></i> Send to Participants
+                                </button>
                             </div>
                             <span className="p-input-icon-left">
                                 <i className="pi pi-search" />
@@ -406,6 +443,7 @@ const RecommendationManagement = () => {
                         </div>
                     }
                 >
+                    <Column selectionMode="multiple" headerStyle={{ width: '50px' }}></Column>
                     <Column header="No" body={(_, { rowIndex }) => rowIndex + 1} style={{ width: '50px' }} />
                     <Column field="title" header="Title" sortable />
                     <Column
@@ -438,7 +476,6 @@ const RecommendationManagement = () => {
                 modal
             >
                 <div className="flex flex-col gap-4 p-4">
-                    {/* Title */}
                     <div className="field">
                         <label htmlFor="title" className="font-medium text-sm text-gray-600 mb-1 block">
                             Title <span className="text-red-500">*</span>
@@ -453,7 +490,6 @@ const RecommendationManagement = () => {
                         />
                     </div>
 
-                    {/* Content */}
                     <div className="field">
                         <label htmlFor="content" className="font-medium text-sm text-gray-600 mb-1 block">
                             Content <span className="text-red-500">*</span>
@@ -470,7 +506,6 @@ const RecommendationManagement = () => {
                         />
                     </div>
 
-                    {/* Schedule Section */}
                     <div className="">
                         <div className="flex justify-between items-center mb-3">
                             <Button
@@ -494,7 +529,6 @@ const RecommendationManagement = () => {
                                     key={`sched-${schedIdx}`}
                                     className="border border-gray-200 rounded-md bg-white shadow-xs"
                                 >
-
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
                                             <Button
@@ -507,16 +541,25 @@ const RecommendationManagement = () => {
 
                                         <div className="field">
                                             <label className="block text-sm font-medium text-gray-600 mb-1">
-                                                App Package <span className="text-red-500">*</span>
+                                                App Packages <span className="text-red-500">*</span>
                                             </label>
-                                            <InputText
-                                                value={sched.app_packages}
-                                                onChange={(e) => handleScheduleChange(schedIdx, 'app_packages', e.target.value)}
+                                            <MultiSelect
+                                                value={sched.app_packages_array || []}
+                                                options={availableAppPackages} // Add filter
+                                                onChange={(e) => handleScheduleChange(schedIdx, 'app_packages_array', e.value)}
+                                                onFilter={(e) => setAppPackageSearch(e.filter)}
+                                                filter
+                                                optionLabel="label"
+                                                placeholder="Select apps"
+                                                display="chip"
                                                 className="w-full"
-                                                placeholder="com.example.app"
                                                 required
                                             />
+                                            <small className="text-xs text-gray-500">
+                                                Selected: {sched.app_packages || 'None'}
+                                            </small>
                                         </div>
+
                                         <div className="field">
                                             <label className="block text-sm font-medium text-gray-600 mb-1">
                                                 Days <span className="text-red-500">*</span>
@@ -537,7 +580,6 @@ const RecommendationManagement = () => {
                                         </div>
                                     </div>
 
-                                    {/* Time Ranges Section */}
                                     <div className="mt-4">
                                         <div className="flex justify-between items-center mb-2">
                                             <button
@@ -598,7 +640,6 @@ const RecommendationManagement = () => {
                         </div>
                     </div>
 
-                    {/* Dialog Footer */}
                     <div className='mt-3' style={{ display: 'flex', flexDirection: 'row-reverse' }}>
                         <button
                             className="btn btn-danger"
@@ -609,79 +650,22 @@ const RecommendationManagement = () => {
                             className="btn btn-primary"
                             onClick={handleSave}
                             style={{ margin: '5px' }}
-                            disabled={!form.title || form.schedules.some(s => !s.app_packages || !s.app_schedule_days || !s.time_ranges || s.time_ranges.length === 0)}
+                            disabled={!form.title || form.schedules.some(s =>
+                                !s.app_packages || s.app_packages_array.length === 0 ||
+                                !s.app_schedule_days || !s.time_ranges || s.time_ranges.length === 0)}
                         >
                             {editing ? "Update" : "Save"}
                         </button>
                     </div>
                 </div>
-            </Dialog >
-
-
-            {/* Particiapnts show modal */}
-            <Dialog
-                visible={participantsModalOpen} // Use 'visible' instead of 'open'
-                onHide={() => setParticipantsModalOpen(false)}
-                maxWidth="sm"
-                fullWidth
-            >
-                <DialogTitle>
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <Typography variant="h6">
-                            Send Recommendation
-                        </Typography>
-                        <IconButton onClick={() => setParticipantsModalOpen(false)}>
-                            <FontAwesomeIcon icon={faTimes} />
-                        </IconButton>
-                    </Box>
-                </DialogTitle>
-
-                <DialogContent dividers>
-                    <List disablePadding>
-                        {participants?.length ? (
-                            participants.map((participant, idx) => (
-                                <div key={participant.id}>
-                                    <ListItem
-                                        secondaryAction={
-                                            <Button
-                                                onClick={() => handleSendRecommendation(participant.id)}
-                                                variant="contained"
-                                                size="small"
-                                                color="primary"
-                                                sx={{ minWidth: 100 }}
-                                            >
-                                                {'Send'}
-                                            </Button>
-                                        }
-                                    >
-                                        <ListItemAvatar>
-                                            <Avatar>
-                                                <FontAwesomeIcon icon={faUser} />
-                                            </Avatar>
-                                        </ListItemAvatar>
-                                    </ListItem>
-                                    {idx < participants.length - 1 && (
-                                        <Divider component="li" />
-                                    )}
-                                </div>
-                            ))
-                        ) : (
-                            <Typography sx={{ mt: 2 }}>
-                                No participants or pending invitations.
-                            </Typography>
-                        )}
-                    </List>
-                </DialogContent>
-
-                <DialogActions>
-                    <Button onClick={() => setParticipantsModalOpen(false)} color="primary">
-                        Close
-                    </Button>
-                </DialogActions>
             </Dialog>
 
-
-        </div >
+            <StudyParticipantsModal
+                participantsModalOpen={participantsModalOpen}
+                setParticipantsModalOpen={setParticipantsModalOpen}
+                handleSendRecommendation={(participants) => handleSendRecommendation(participants)}
+            />
+        </div>
     );
 };
 

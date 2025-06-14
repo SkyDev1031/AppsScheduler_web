@@ -103,4 +103,34 @@ class StudyController extends Controller
         
         return response()->json(null, 204);
     }
+
+    public function getStudiesWithParticipants(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Fetch studies for the current researcher along with their participants
+        // $studies = Study::where('researcher_id', $user->id)->get();
+        // return response()->json($studies);
+
+        $studies = Study::with(['participants:id,userID'])
+            ->where('researcher_id', $user->id)
+            ->get()
+            ->map(function ($study) {
+                return [
+                    'studyGroup' => $study->title,
+                    'participants' => $study->participants->map(function ($participant) {
+                        return [
+                            'id' => $participant->id,
+                            'userID' => $participant->userID,
+                        ];
+                    }),
+                ];
+            });
+
+        return response()->json(['data' => $studies, 'success' => true]);
+    }
 }

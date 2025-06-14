@@ -21,3 +21,5 @@ export const inviteParticipant = (data) => _REQUEST(`study-requests`, _REQ_METHO
 // DELETE a Participant Requeset by ID
 export const cancelInviteParticipant = (data) => _REQUEST(`study-requests/cancel`, _REQ_METHOD.POST, data);
 
+export const getStudiesWithParticipants = () =>
+    _REQUEST('studies/with-participants', _REQ_METHOD.POST);

@@ -10,7 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Services\FirebaseNotificationService;
 
-class SendStudyNotification implements ShouldQueue
+class SendPushNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     protected $token, $title, $message, $studyId, $actionType, $payload;

@@ -33,6 +33,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/{study}',                      [StudyController::class, 'show']);
         Route::put('/{study}',                      [StudyController::class, 'update']);
         Route::delete('/{study}',                   [StudyController::class, 'destroy']);
+        Route::post('/with-participants',               [StudyController::class, 'getStudiesWithParticipants']);
     });
 
     Route::prefix('study-requests')->group(function () {
@@ -129,4 +130,6 @@ Route::prefix('recommendations')->group(function () {
     Route::get('/{id}',                             [RecommendationController::class, 'show']);
     Route::put('/{id}',                             [RecommendationController::class, 'update']);
     Route::delete('/{id}',                          [RecommendationController::class, 'destroy']);
+    Route::post('/packages',                        [RecommendationController::class, 'getAllPackages']);
+    Route::post('/send-to-participants',            [RecommendationController::class, 'sendToParticipants']);
 });

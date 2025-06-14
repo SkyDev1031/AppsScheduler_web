@@ -1,3 +1,91 @@
 .action-button-study {
     margin: 3px !important;
 }
+
+/* Custom styles for the checkbox tree */
+
+.study-participants-modal {
+    .p-dialog-content {
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 0; /* Remove default padding to help with button positioning */
+        max-height: 70vh; /* Set maximum height relative to viewport */
+        overflow-y: auto; /* Enable vertical scrolling if content exceeds max height */
+    }
+
+    .tree-container {
+        flex: 1;
+        overflow-y: auto; /* Ensure scrolling within the tree container */
+        margin-bottom: 1rem;
+    }
+
+    /* Scrollbar styling for the modal content */
+    .p-dialog-content::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .p-dialog-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .p-dialog-content::-webkit-scrollbar-thumb {
+        background: #ced4da;
+        border-radius: 4px;
+    }
+
+    .p-dialog-content::-webkit-scrollbar-thumb:hover {
+        background: #adb5bd;
+    }
+}
+
+/* Tree item spacing */
+.rct-node {
+    padding: 8px 0;
+}
+
+.rct-text {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.rct-title {
+    margin-left: 8px;
+}
+
+/* Icons styling */
+.rct-icon {
+    font-size: 1.2em;
+    margin-right: 8px;
+}
+
+.bi-person-fill {
+    color: #6c757d;
+}
+
+/* Scrollbar styling for tree container */
+.tree-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tree-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.tree-container::-webkit-scrollbar-thumb {
+    background: #ced4da;
+    border-radius: 4px;
+}
+
+.tree-container::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
+}
+
+/* Button container styling */
+.button-container {
+    background-color: #f8f9fa; /* Light gray background */
+    padding: 1rem;
+    margin: 0 -1rem -1rem -1rem; /* Align with dialog edges */
+}

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\StudyParticipantRequest;
 use App\Models\Study;
 use App\Models\AppUser;
-use App\Jobs\SendStudyNotification;
+use App\Jobs\SendPushNotification;
 use App\Services\FirebaseNotificationService;
 use App\Events\StudyInviteStatusUpdated;
 use Illuminate\Support\Facades\Notification;
@@ -38,11 +38,12 @@ class StudyParticipantRequestController extends Controller
     
         if ($created) {
             // Send a notification to the participant
-            SendStudyNotification::dispatch(
+            SendPushNotification::dispatch(
                 $invite->participant->fcm_token,
                 'Study Invitation',
                 "You have been invited to participate in the study: {$study->title}.",
-                $study->id
+                $study->id,
+                "invitation"
             );
             return response()->json([
                 'status' => 'success',
@@ -87,11 +88,12 @@ class StudyParticipantRequestController extends Controller
         // );
 
         $invite->delete();
-        SendStudyNotification::dispatch(
+        SendPushNotification::dispatch(
             $invite->participant->fcm_token,
             'Invitation Cancelled',
             "The invitation to participate in the study: {$invite->study->title} has been cancelled.",
-            $invite->study->id
+            $invite->study->id,
+            "invitation-cancel"
         );
         return response()->json(['message' => 'deleted successfully.', 'invite' => $invite], 200);
     }

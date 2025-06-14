@@ -21,7 +21,7 @@ class FirebaseNotificationService
             $url = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
 
             $payloadJSON = json_encode($payload);
-            // print_r($payloadJSON);
+            print_r($payloadJSON);
 
             $body = [
                 'message' => [

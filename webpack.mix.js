@@ -16,8 +16,18 @@ mix
     .js('resources/js/user.js', 'public/js')
     .js('resources/js/admin.js', 'public/js')
     .react()
-    // .extract(["react"])
     .sass('resources/sass/app.scss', 'public/css');
 
-mix.disableNotifications()
-mix.browserSync('http://127.0.0.1:8000')
+mix.disableNotifications();
+
+mix.browserSync({
+    proxy: 'http://127.0.0.1:8000',
+    files: [
+        'resources/js/**/*.js', // Watch JS files
+        'resources/sass/**/*.scss', // Watch SCSS files
+        'resources/views/**/*.blade.php' // Watch Blade templates
+    ],
+    ignore: [
+        '**/*.php' // Ignore changes in PHP files
+    ]
+});
