@@ -140,6 +140,10 @@ const RecommendationManagement = () => {
     };
 
     const openParticipantsDialog = (selectedRecommendations) => {
+        if(selectedRecommendations.length > 3) {
+            toast_error('You can only send recommendations to a maximum of 3 participants at a time.');
+            return;
+        }
         setParticipantsModalOpen(true);
     };
 
@@ -375,7 +379,7 @@ const RecommendationManagement = () => {
             <Button
                 icon="pi pi-pencil"
                 className="p-button-sm"
-                tooltip="Edit category"
+                tooltip="Edit Recommendation"
                 tooltipOptions={{ position: 'top' }}
                 onClick={() => openEditDialog(rowData)}
                 style={{ marginRight: '5px' }}
@@ -383,7 +387,7 @@ const RecommendationManagement = () => {
             <Button
                 icon="pi pi-trash"
                 className="p-button-danger p-button-sm"
-                tooltip="Delete category"
+                tooltip="Delete Recommendation"
                 tooltipOptions={{ position: 'top' }}
                 onClick={() => handleDelete(rowData)}
             />
@@ -451,10 +455,17 @@ const RecommendationManagement = () => {
                         header="Content"
                         body={(row) => renderContentPreview(row.content)}
                     />
-                    <Column
+                    {/* <Column
                         field="status"
                         header="Status"
                         body={renderStatus}
+                        style={{ width: '120px' }}
+                    /> */}
+                    <Column
+                        field="created_at"
+                        header="Date"
+                        body={(row) => new Date(row.created_at).toLocaleDateString()}
+                        sortable
                         style={{ width: '120px' }}
                     />
                     <Column

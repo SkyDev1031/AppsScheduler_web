@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\DB;
 use App\Jobs\SendPushNotification;
 use App\Models\AppUser;
 use Google\Service\CloudControlsPartnerService\Console;
+use Google\Service\ServiceControl\Auth;
+use Google\Service\Slides\Autofit;
+use App\Models\SendRecommendation;
 
 class RecommendationController extends Controller
 {
@@ -119,23 +122,29 @@ class RecommendationController extends Controller
         foreach ($participants as $participant) {
             $appuser = AppUser::where('id', $participant)->first();
             $fcmToken = $appuser->fcm_token ?? null;
-            if ($fcmToken) {
-                // Dispatch the job to send push notification
-                SendPushNotification::dispatch(
-                    $fcmToken,
-                    'Recommendations',
-                    'You can select recommendation.',
-                    0, // Assuming studyId is not needed here
-                    'recommendation',
-                    $payload
-                );
+            if (!$appuser || !$fcmToken) {
+                continue;
             }
+            // // 1. Create send_recommendations entry
+            // $sendRecommendation = SendRecommendation::create([
+            //     'recommendation_id' => 0,
+            //     'researcher_id'     => 0,
+            //     'participant_id'    => $participant,
+            //     'send_time'         => now(),
+            //     'status'            => 'pending',
+            // ]);
+
+            // Dispatch the job to send push notification
+            SendPushNotification::dispatch(
+                $fcmToken,
+                'Recommendations',
+                'New recommendations arrived. Please click here to view them.',
+                0, // Assuming studyId is not needed here
+                'recommendation',
+                $payload
+            );
         }
 
-        // return response()->json([
-        //     'participants' => $request->participants,
-        //     'payload' => $request->payload,
-        // ], 501);
         return response()->json([
             'success' => true,
             'message' => 'Notifications sent to participants.'
