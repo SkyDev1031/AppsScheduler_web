@@ -8,7 +8,6 @@ export const getAllQuestionnaires = () =>
 
 export const createQuestionnaire = (payload) =>
     _REQUEST('questionnaires', _REQ_METHOD.POST, payload);
-
 export const getQuestionnaire = (id) =>
     _REQUEST(`questionnaires/${id}`, _REQ_METHOD.GET);
 

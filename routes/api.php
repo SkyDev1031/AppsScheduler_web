@@ -48,6 +48,8 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/', [QuestionnaireController::class, 'store']);
         Route::post('/{id}/assign', [QuestionnaireController::class, 'assignToParticipants']);
         Route::get('/{id}', [QuestionnaireController::class, 'show']);
+        Route::put('/{id}', [QuestionnaireController::class, 'update']);
+        Route::delete('/{id}', [QuestionnaireController::class, 'destroy']);
         Route::get('/{id}/responses', [QuestionnaireController::class, 'getResponses']);
         Route::post('/summary', [QuestionnaireController::class, 'summary']);
     });

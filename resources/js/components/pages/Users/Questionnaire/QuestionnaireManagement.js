@@ -1,26 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { getAllQuestionnaires, createQuestionnaire, updateQuestionnaire, deleteQuestionnaire, getQuestionnaire } from '../../../api/QuestionnaireAPI';
+import { getAllQuestionnaires, deleteQuestionnaire, getQuestionnaire } from '../../../api/QuestionnaireAPI';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
-import QuestionEditor from './QuestionEditor';
+import { Card } from 'primereact/card';
+import { Toolbar } from 'primereact/toolbar';
+import QuestionnaireForm from './QuestionnaireForm';
 import AssignmentModal from './AssignmentModal';
 import ResponseViewer from './ResponseViewer';
-import QuestionnaireForm from './QuestionnaireForm';
+import { Badge } from 'primereact/badge';
+
 const QuestionnaireManagement = () => {
+    const [questionnaires, setQuestionnaires] = useState([]);
+    const [dialogVisible, setDialogVisible] = useState(false);
     const [editingQuestionnaire, setEditingQuestionnaire] = useState(null);
     const [assignVisible, setAssignVisible] = useState(false);
     const [responseVisible, setResponseVisible] = useState(false);
-
-    const [questionnaires, setQuestionnaires] = useState([]);
-    const [dialogVisible, setDialogVisible] = useState(false);
-    const [editing, setEditing] = useState(null);
-    const [selected, setSelected] = useState(null);
-    const [form, setForm] = useState({ title: '', description: '' });
+    const [selectedQuestionnaire, setSelectedQuestionnaire] = useState(null);
     const toast = useRef(null);
 
     useEffect(() => {
@@ -32,21 +31,24 @@ const QuestionnaireManagement = () => {
             .then(res => setQuestionnaires(res.data || []))
             .catch(err => {
                 console.error(err);
-                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to load questionnaires' });
+                toast.current.show({ 
+                    severity: 'error', 
+                    summary: 'Error', 
+                    detail: 'Failed to load questionnaires',
+                    life: 3000
+                });
             });
     };
 
     const openNew = () => {
-        setForm({ title: '', description: '' });
-        setEditing(false);
+        setEditingQuestionnaire(null);
         setDialogVisible(true);
     };
 
-    const openEdit = (rowData) => {
-        getQuestionnaire(rowData.id)
+    const openEdit = (questionnaire) => {
+        getQuestionnaire(questionnaire.id)
             .then(res => {
-                setForm({ ...rowData });
-                setEditing(res.data);
+                setEditingQuestionnaire(res.data);
                 setDialogVisible(true);
             })
             .catch(err => {
@@ -54,121 +56,189 @@ const QuestionnaireManagement = () => {
                 toast.current.show({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'Failed to load questionnaire data'
+                    detail: 'Failed to load questionnaire data',
+                    life: 3000
                 });
             });
     };
 
-
-    const openAssign = (q) => {
-        setEditingQuestionnaire(q);
+    const openAssign = (questionnaire) => {
+        setSelectedQuestionnaire(questionnaire);
         setAssignVisible(true);
     };
 
-    const openResponses = (q) => {
-        setEditingQuestionnaire(q);
+    const openResponses = (questionnaire) => {
+        setSelectedQuestionnaire(questionnaire);
         setResponseVisible(true);
     };
 
-    const hideDialog = () => {
-        setDialogVisible(false);
-    };
-
-    const handleSave = (payload) => {
-        const apiCall = editing
-            ? updateQuestionnaire(editing.id, payload)
-            : createQuestionnaire(payload);
-
-        apiCall.then(() => {
-            fetchData();
-            setDialogVisible(false);
-            setEditing(null);
-        });
-    };
-
-    const handleDelete = (rowData) => {
+    const handleDelete = (questionnaire) => {
         confirmDialog({
-            message: `Are you sure you want to delete "${rowData.title}"?`,
+            message: `Are you sure you want to delete "${questionnaire.title}"?`,
             header: 'Delete Confirmation',
             icon: 'pi pi-exclamation-triangle',
+            acceptClassName: 'p-button-danger',
             accept: async () => {
                 try {
-                    await deleteQuestionnaire(rowData.id);
-                    toast.current.show({ severity: 'warn', summary: 'Deleted', detail: 'Questionnaire deleted' });
+                    await deleteQuestionnaire(questionnaire.id);
+                    toast.current.show({ 
+                        severity: 'success', 
+                        summary: 'Deleted', 
+                        detail: 'Questionnaire deleted successfully',
+                        life: 3000
+                    });
                     loadData();
                 } catch {
-                    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Deletion failed' });
+                    toast.current.show({ 
+                        severity: 'error', 
+                        summary: 'Error', 
+                        detail: 'Deletion failed',
+                        life: 3000
+                    });
                 }
             }
         });
     };
 
+    // const createQuestionnaireHandle = (payload) => {
+    //     console.log("payload", payload);
+    // }
+
+    // const updateQuestionnaireHandle = (id, payload) => {
+    //     console.log("---", id, payload)
+    // }
+
+    const handleSaveSuccess = () => {
+        toast.current.show({
+            severity: 'success',
+            summary: 'Success',
+            detail: editingQuestionnaire ? 'Questionnaire updated' : 'Questionnaire created',
+            life: 3000
+        });
+        loadData();
+        setDialogVisible(false);
+    };
+
     const actionTemplate = (rowData) => (
-        <>
-            <Button icon="pi pi-pencil" className="p-button-rounded p-button-text" onClick={() => openEdit(rowData)} />
-            <Button icon="pi pi-users" className="p-button-rounded p-button-text" onClick={() => openAssign(rowData)} />
-            <Button icon="pi pi-eye" className="p-button-rounded p-button-text" onClick={() => openResponses(rowData)} />
-            <Button icon="pi pi-trash" className="p-button-rounded p-button-text p-button-danger" onClick={() => handleDelete(rowData)} />
-        </>
+        <div className="flex gap-2">
+            <Button 
+                icon="pi pi-pencil" 
+                className="p-button-rounded p-button-text p-button-primary" 
+                tooltip="Edit" 
+                tooltipOptions={{ position: 'top' }}
+                onClick={() => openEdit(rowData)} 
+            />
+            <Button 
+                icon="pi pi-users" 
+                className="p-button-rounded p-button-text p-button-help" 
+                tooltip="Assign" 
+                tooltipOptions={{ position: 'top' }}
+                onClick={() => openAssign(rowData)} 
+            />
+            <Button 
+                icon="pi pi-eye" 
+                className="p-button-rounded p-button-text p-button-info" 
+                tooltip="View Responses" 
+                tooltipOptions={{ position: 'top' }}
+                onClick={() => openResponses(rowData)} 
+            />
+            <Button 
+                icon="pi pi-trash" 
+                className="p-button-rounded p-button-text p-button-danger" 
+                tooltip="Delete" 
+                tooltipOptions={{ position: 'top' }}
+                onClick={() => handleDelete(rowData)} 
+            />
+        </div>
+    );
+
+    const statusTemplate = (rowData) => (
+        <div className="flex gap-2">
+            <Badge 
+                value={`${rowData.assignments_count} assigned`} 
+                severity="info" 
+                size="large" 
+            />
+            <Badge 
+                value={`${rowData.responses_count} responses`} 
+                severity="success" 
+                size="large" 
+            />
+        </div>
+    );
+
+    const leftToolbarTemplate = () => (
+        <div className="flex align-items-center gap-2">
+            <h2 className="m-0">Questionnaires</h2>
+            <Badge value={questionnaires.length} severity="info" />
+        </div>
+    );
+
+    const rightToolbarTemplate = () => (
+        <Button 
+            label="New Questionnaire" 
+            icon="pi pi-plus" 
+            className="p-button-raised"
+            onClick={openNew} 
+        />
     );
 
     return (
-        <>
-            <div className="p-4">
-                <Toast ref={toast} />
-                <ConfirmDialog />
-                <div className="flex justify-between items-center mb-3">
-                    <h2>Questionnaire Management</h2>
-                    <Button label="New Questionnaire" icon="pi pi-plus" onClick={openNew} />
-                </div>
+        <div className="p-4">
+            <Toast ref={toast} position="top-right" />
+            <ConfirmDialog />
+            
+            <Card>
+                <Toolbar 
+                    className="mb-4" 
+                    left={leftToolbarTemplate} 
+                    right={rightToolbarTemplate} 
+                />
+                
                 <DataTable
                     value={questionnaires}
                     paginator
-                    rows={5}
+                    rows={10}
+                    rowsPerPageOptions={[5, 10, 25]}
+                    emptyMessage="No questionnaires found"
                     selectionMode="single"
-                    selection={selected}
-                    onSelectionChange={(e) => setSelected(e.value)}
+                    selection={selectedQuestionnaire}
+                    onSelectionChange={(e) => setSelectedQuestionnaire(e.value)}
                     dataKey="id"
                     responsiveLayout="scroll"
                 >
-                    <Column field="id" header="ID" style={{ width: '5%' }} headerStyle={{ textAlign: 'center' }} />
-                    <Column field="title" header="Title" headerStyle={{ textAlign: 'center' }} />
-                    <Column field="description" header="Description" headerStyle={{ textAlign: 'center' }} />
-                    <Column field="assignments_count" header="Assigned" style={{ width: '10%' }} headerStyle={{ textAlign: 'center' }} />
-                    <Column field="responses_count" header="Responses" style={{ width: '10%' }} headerStyle={{ textAlign: 'center' }} />
-                    <Column header="Actions" body={actionTemplate} style={{ textAlign: 'center', width: '20%' }} headerStyle={{ textAlign: 'center' }} />
+                    <Column field="id" header="ID" style={{ width: '5%' }} />
+                    <Column field="title" header="Title" sortable />
+                    <Column field="description" header="Description" sortable />
+                    <Column header="Status" body={statusTemplate} style={{ width: '25%' }} />
+                    <Column 
+                        header="Actions" 
+                        body={actionTemplate} 
+                        style={{ width: '20%' }} 
+                        alignHeader="center"
+                    />
                 </DataTable>
+            </Card>
 
-                <Dialog
-                    header={editing ? 'Edit Questionnaire' : 'New Questionnaire'}
-                    visible={dialogVisible}
-                    style={{ width: '400px' }}
-                    onHide={hideDialog}
-                    modal
-                >
-                    <div className="field mb-3">
-                        <label htmlFor="title">Title</label>
-                        <InputText id="title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} autoFocus />
-                    </div>
-                    <div className="field mb-3">
-                        <label htmlFor="description">Description</label>
-                        <InputText id="description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-                    </div>
-                    <div className="flex justify-end gap-2">
-                        <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
-                        <Button label="Save" icon="pi pi-check" onClick={handleSave} disabled={!form.title.trim()} />
-                    </div>
-                </Dialog>
-            </div>
-            <AssignmentModal visible={assignVisible} onHide={() => setAssignVisible(false)} questionnaire={editingQuestionnaire} />
-            <ResponseViewer visible={responseVisible} onHide={() => setResponseVisible(false)} questionnaire={editingQuestionnaire} />
             <QuestionnaireForm
                 visible={dialogVisible}
                 onHide={() => setDialogVisible(false)}
-                onSave={handleSave}
-                initialData={editing || { title: '', description: '', questions: [] }}
+                onSaveSuccess={handleSaveSuccess}
+                questionnaire={editingQuestionnaire}
             />
-        </>
+
+            <AssignmentModal 
+                visible={assignVisible} 
+                onHide={() => setAssignVisible(false)} 
+                questionnaire={selectedQuestionnaire} 
+            />
+            
+            <ResponseViewer 
+                visible={responseVisible} 
+                onHide={() => setResponseVisible(false)} 
+                questionnaire={selectedQuestionnaire} 
+            />
+        </div>
     );
 };
 

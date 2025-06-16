@@ -81,6 +81,84 @@ class QuestionnaireController extends Controller
     {
         return response()->json(['data' => Questionnaire::with('questions.options')->findOrFail($id)], 200);
     }
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'researcher_id' => 'required|exists:users,id',
+            'title' => 'required|string',
+            'description' => 'nullable|string',
+            'questions' => 'required|array',
+            'questions.*.id' => 'nullable|integer|exists:questions,id', // for existing questions
+            'questions.*.text' => 'required|string',
+            'questions.*.type' => 'required|in:single_choice,multi_choice,rating',
+            'questions.*.rating_scale_max' => 'nullable|integer',
+            'questions.*.options' => 'array', // array of text strings
+            'questions.*.options.*' => 'string', // each option is just text
+        ]);
+    
+        $questionnaire = Questionnaire::findOrFail($id);
+        $questionnaire->update($request->only(['researcher_id', 'title', 'description']));
+    
+        // Get all current question IDs to detect deletions
+        $currentQuestionIds = $questionnaire->questions()->pluck('id')->toArray();
+        $updatedQuestionIds = [];
+    
+        foreach ($data['questions'] as $q) {
+            // Update or create question
+            $question = isset($q['id']) 
+                ? $questionnaire->questions()->findOrFail($q['id'])
+                : $questionnaire->questions()->create([
+                    'text' => $q['text'],
+                    'type' => $q['type'],
+                    'rating_scale_max' => $q['rating_scale_max'] ?? null,
+                ]);
+    
+            $question->update([
+                'text' => $q['text'],
+                'type' => $q['type'],
+                'rating_scale_max' => $q['rating_scale_max'] ?? null,
+            ]);
+    
+            $updatedQuestionIds[] = $question->id;
+    
+            // Handle options for choice questions
+            if (in_array($q['type'], ['single_choice', 'multi_choice']) && isset($q['options'])) {
+                // Delete all existing options and create new ones
+                $question->options()->delete();
+                
+                foreach ($q['options'] as $optionText) {
+                    $question->options()->create(['text' => $optionText]);
+                }
+            } else {
+                // If question type changed from choice to rating, delete all options
+                $question->options()->delete();
+            }
+        }
+    
+        // Delete questions that were removed
+        $questionsToDelete = array_diff($currentQuestionIds, $updatedQuestionIds);
+        if (!empty($questionsToDelete)) {
+            $questionnaire->questions()->whereIn('id', $questionsToDelete)->delete();
+        }
+    
+        return response()->json($questionnaire->load('questions.options'), 200);
+    }
+    
+    public function destroy($id)
+    {
+        try {
+            $questionnaire = Questionnaire::findOrFail($id);
+            $questionnaire->delete();
+    
+            return response()->json(['message' => 'Questionnaire deleted successfully.'], 200);    
+        }
+        catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error deleting questionnaire',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     public function getResponses($id)
     {

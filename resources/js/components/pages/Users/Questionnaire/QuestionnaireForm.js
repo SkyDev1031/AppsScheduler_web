@@ -1,49 +1,131 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
-import { Button } from 'primereact/button';
+import { Divider } from 'primereact/divider';
 import QuestionEditor from './QuestionEditor';
+import { useGlobalContext } from '../../../contexts';
+import {createQuestionnaire, updateQuestionnaire} from '../../../api/QuestionnaireAPI'; // Adjust the import path as needed
 
-const QuestionnaireForm = ({ visible, onHide, onSave, initialData = {} }) => {
+const QuestionnaireForm = ({ visible, onHide, onSaveSuccess, questionnaire }) => {
+    const { user } = useGlobalContext();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [questions, setQuestions] = useState([]);
+    const [isSaving, setIsSaving] = useState(false);
 
-    useEffect(() => {
-        if (initialData) {
-            setTitle(initialData.title || '');
-            setDescription(initialData.description || '');
-            setQuestions(initialData.questions || []);
+    React.useEffect(() => {
+        if (questionnaire) {
+            setTitle(questionnaire.title || '');
+            setDescription(questionnaire.description || '');
+            setQuestions(questionnaire.questions || []);
+        } else {
+            setTitle('');
+            setDescription('');
+            setQuestions([]);
         }
-    }, [initialData]);
+    }, [questionnaire]);
 
     const handleSubmit = () => {
+        if (!title.trim()) {
+            return;
+        }
+
+        setIsSaving(true);
+        
         const payload = {
             title,
             description,
-            researcher_id: 1, // or dynamic
-            questions
+            researcher_id: user.id,
+            questions: questions.map(q => ({
+                ...q,
+                options: q.type === 'rating' ? [] : q.options.map(opt => opt.text)
+            }))
         };
-        onSave(payload);
+        // console.log(questionnaire.id, payload)
+        // return;
+        const apiCall = questionnaire 
+            ? updateQuestionnaire(questionnaire.id, payload)
+            : createQuestionnaire(payload);
+
+        apiCall.then(() => {
+            onSaveSuccess();
+        }).catch(error => {
+            console.error('Error saving questionnaire:', error);
+        }).finally(() => {
+            setIsSaving(false);
+        });
     };
 
+    const footer = (
+        <div>
+            <Button 
+                label="Cancel" 
+                icon="pi pi-times" 
+                className="p-button-text" 
+                onClick={onHide} 
+                disabled={isSaving}
+            />
+            <Button 
+                label="Save" 
+                icon="pi pi-check" 
+                onClick={handleSubmit} 
+                loading={isSaving}
+                disabled={!title.trim() || isSaving}
+            />
+        </div>
+    );
+
     return (
-        <Dialog visible={visible} onHide={onHide} header={initialData.id ? 'Edit Questionnaire' : 'New Questionnaire'} style={{ width: '50vw' }}>
-            <div className="p-fluid">
-                <div className="field">
-                    <label>Title</label>
-                    <InputText value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Dialog 
+            visible={visible} 
+            onHide={onHide} 
+            header={questionnaire ? 'Edit Questionnaire' : 'Create New Questionnaire'} 
+            style={{ width: '70vw' }}
+            footer={footer}
+            modal
+            className="p-fluid"
+        >
+            <div className="grid">
+                <div className="col-12 md:col-6">
+                    <div className="field">
+                        <label htmlFor="title">Title*</label>
+                        <InputText 
+                            id="title" 
+                            value={title} 
+                            onChange={(e) => setTitle(e.target.value)} 
+                            placeholder="Enter questionnaire title"
+                            className="w-full"
+                        />
+                    </div>
                 </div>
-                <div className="field">
-                    <label>Description</label>
-                    <InputTextarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
+                <div className="col-12">
+                    <div className="field">
+                        <label htmlFor="description">Description</label>
+                        <InputTextarea 
+                            id="description" 
+                            value={description} 
+                            onChange={(e) => setDescription(e.target.value)} 
+                            rows={3} 
+                            placeholder="Enter questionnaire description"
+                            className="w-full"
+                        />
+                    </div>
                 </div>
-                <QuestionEditor questions={questions} setQuestions={setQuestions} />
             </div>
-            <div className="flex justify-end mt-3">
-                <Button label="Save" onClick={handleSubmit} />
-            </div>
+
+            <Divider align="left">
+                <div className="inline-flex align-items-center">
+                    <i className="pi pi-question-circle mr-2"></i>
+                    <span className="font-bold">Questions</span>
+                </div>
+            </Divider>
+
+            <QuestionEditor 
+                questions={questions} 
+                setQuestions={setQuestions} 
+            />
         </Dialog>
     );
 };
