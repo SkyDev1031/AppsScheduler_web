@@ -11,6 +11,8 @@ use App\Models\AppUser; // Import the AppUser model
 use App\Jobs\SendPushNotification;
 use Google\Service\Monitoring\SendNotificationChannelVerificationCodeRequest;
 use App\Models\StudyParticipantRequest; // Import the StudyParticipantRequest model
+use App\Models\QuestionnaireAssignment;
+use App\Models\QuestionnaireResponse;
 
 class AppUserController extends Controller
 {
@@ -270,4 +272,34 @@ class AppUserController extends Controller
         }
     }
 
+
+    public function getAssignedQuestionnaires($participantId)
+    {
+        return QuestionnaireAssignment::with('questionnaire.questions.options')
+            ->where('participant_id', $participantId)
+            ->get();
+    }
+
+    public function submitResponses(Request $request)
+    {
+        $data = $request->validate([
+            'assignment_id' => 'required|exists:questionnaire_assignments,id',
+            'responses' => 'required|array',
+            'responses.*.question_id' => 'required|exists:questions,id',
+            'responses.*.answer' => 'required',
+        ]);
+
+        foreach ($data['responses'] as $res) {
+            QuestionnaireResponse::updateOrCreate([
+                'assignment_id' => $data['assignment_id'],
+                'question_id' => $res['question_id'],
+            ], [
+                'answer' => json_encode($res['answer']),
+            ]);
+        }
+
+        QuestionnaireAssignment::where('id', $data['assignment_id'])->update(['completed_at' => now()]);
+
+        return response()->json(['message' => 'Responses submitted successfully']);
+    }
 }

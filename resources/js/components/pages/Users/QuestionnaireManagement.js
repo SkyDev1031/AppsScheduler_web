@@ -1,11 +1,25 @@
-
+import React, { useEffect, useState } from 'react';
+import { getAllQuestionnaires } from '../../api/QuestionnaireAPI';
 
 const QuestionnaireManagement = () => {
-    return (
-        <>
-            <h3>Hello Questionnaires</h3>
-        </>
-    )
-}
+    const [questionnaires, setQuestionnaires] = useState([]);
 
-export default QuestionnaireManagement
+    useEffect(() => {
+        getAllQuestionnaires()
+            .then(res => setQuestionnaires(res))
+            .catch(err => console.error('Failed to fetch questionnaires:', err));
+    }, []);
+
+    return (
+        <div>
+            <h3>All Questionnaires</h3>
+            <ul>
+                {questionnaires.map(q => (
+                    <li key={q.id}>{q.title}</li>
+                ))}
+            </ul>
+        </div>
+    );
+};
+
+export default QuestionnaireManagement;

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\QuestionnaireController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +41,16 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/',                            [StudyParticipantRequestController::class, 'invite']);   // researcher
         Route::post('/cancel',                      [StudyParticipantRequestController::class, 'cancel']);   // researcher
     });    
+
+    
+    Route::prefix('questionnaires')->group(function () {
+        Route::post('/', [QuestionnaireController::class, 'store']);
+        Route::post('/{id}/assign', [QuestionnaireController::class, 'assignToParticipants']);
+        Route::get('/{id}', [QuestionnaireController::class, 'show']);
+        Route::get('/{id}/responses', [QuestionnaireController::class, 'getResponses']);
+        Route::post('/summary', [QuestionnaireController::class, 'summary']);
+    });
+
 });
 
 
@@ -133,3 +144,7 @@ Route::prefix('recommendations')->group(function () {
     Route::post('/packages',                        [RecommendationController::class, 'getAllPackages']);
     Route::post('/send-to-participants',            [RecommendationController::class, 'sendToParticipants']);
 });
+
+
+Route::get('/participants/{id}/questionnaires', [AppUserController::class, 'getAssignedQuestionnaires']);
+Route::post('/questionnaire-responses', [AppUserController::class, 'submitResponses']); 
