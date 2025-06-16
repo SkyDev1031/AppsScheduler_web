@@ -111,7 +111,7 @@ const QuestionEditor = ({ questions, setQuestions }) => {
                             {(q.type === 'single_choice' || q.type === 'multi_choice') && (
                                 <Fieldset legend="Options" className="mt-3">
                                     {q.options.map((opt, oIndex) => (
-                                        <div key={oIndex} className="flex align-items-center gap-2 mb-2">
+                                        <div key={oIndex} className="flex align-items-center gap-2 mb-2" style={{ display: 'flex' }}>
                                             <InputText
                                                 value={opt.text || ''}
                                                 onChange={(e) => updateOption(index, oIndex, e.target.value)}
@@ -120,7 +120,7 @@ const QuestionEditor = ({ questions, setQuestions }) => {
                                             />
                                             <Button
                                                 icon="pi pi-trash"
-                                                className="p-button-rounded p-button-danger p-button-text"
+                                                className="p-button-rounded p-button-danger"
                                                 onClick={() => removeOption(index, oIndex)}
                                                 disabled={q.options.length <= 1}
                                             />
@@ -129,7 +129,7 @@ const QuestionEditor = ({ questions, setQuestions }) => {
                                     <Button
                                         label="Add Option"
                                         icon="pi pi-plus"
-                                        className="p-button-sm p-button-text"
+                                        className="p-button-sm"
                                         onClick={() => addOption(index)}
                                     />
                                 </Fieldset>
@@ -153,7 +153,7 @@ const QuestionEditor = ({ questions, setQuestions }) => {
                                 <Button 
                                     label="Remove Question" 
                                     icon="pi pi-trash" 
-                                    className="p-button-danger p-button-text" 
+                                    className="p-button-danger" 
                                     onClick={() => removeQuestion(index)} 
                                 />
                             </div>
@@ -164,14 +164,14 @@ const QuestionEditor = ({ questions, setQuestions }) => {
 
             <div className="flex justify-between mt-4">
                 <Button 
-                    label="Add Question" 
-                    icon="pi pi-plus" 
+                    label="+ Add Question" 
+                    // icon="pi pi-plus" 
                     className="p-button-raised" 
                     onClick={addQuestion} 
                 />
-                <div className="text-sm text-gray-500">
+                {/* <div className="text-sm text-gray-500">
                     {questions.length} question{questions.length !== 1 ? 's' : ''} added
-                </div>
+                </div> */}
             </div>
         </div>
     );

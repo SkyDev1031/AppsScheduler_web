@@ -13,20 +13,20 @@ use App\Services\FirebaseNotificationService;
 class SendPushNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    protected $token, $title, $message, $studyId, $actionType, $payload;
+    protected $token, $title, $message, $dataId, $actionType, $payload;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($token, $title, $message, $studyId = 0, $actionType = 'notification', $payload = ["title" => 'title', "body" => 'Hello World'])
+    public function __construct($token, $title, $message, $dataId = 0, $actionType = 'notification', $payload = ["title" => 'title', "body" => 'Hello World'])
     {
         //
         $this->token = $token;
         $this->title = $title;
         $this->message = $message;
-        $this->studyId = $studyId;
+        $this->dataId = $dataId;
         $this->actionType = $actionType;
         $this->payload = $payload;
     }
@@ -43,7 +43,7 @@ class SendPushNotification implements ShouldQueue
             $this->token,
             $this->title,
             $this->message,
-            $this->studyId,
+            $this->dataId,
             $this->actionType,
             $this->payload
         );

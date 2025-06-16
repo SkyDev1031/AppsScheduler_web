@@ -4,7 +4,6 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { Toast } from 'primereact/toast';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Card } from 'primereact/card';
 import { Toolbar } from 'primereact/toolbar';
@@ -12,6 +11,8 @@ import QuestionnaireForm from './QuestionnaireForm';
 import AssignmentModal from './AssignmentModal';
 import ResponseViewer from './ResponseViewer';
 import { Badge } from 'primereact/badge';
+import { toast_success, toast_error } from '../../../utils'; // Import toast utilities
+import { useGlobalContext } from '../../../contexts';
 
 const QuestionnaireManagement = () => {
     const [questionnaires, setQuestionnaires] = useState([]);
@@ -21,22 +22,23 @@ const QuestionnaireManagement = () => {
     const [responseVisible, setResponseVisible] = useState(false);
     const [selectedQuestionnaire, setSelectedQuestionnaire] = useState(null);
     const toast = useRef(null);
+    const { setLoading } = useGlobalContext();
 
     useEffect(() => {
         loadData();
     }, []);
 
     const loadData = () => {
+        setLoading(true)
         getAllQuestionnaires()
-            .then(res => setQuestionnaires(res.data || []))
+            .then(res => {
+                setQuestionnaires(res.data || []);
+                setLoading(false)
+                // toast_success('Questionnaires loaded successfully');
+            })
             .catch(err => {
                 console.error(err);
-                toast.current.show({ 
-                    severity: 'error', 
-                    summary: 'Error', 
-                    detail: 'Failed to load questionnaires',
-                    life: 3000
-                });
+                toast_error('Failed to load questionnaires');
             });
     };
 
@@ -53,12 +55,7 @@ const QuestionnaireManagement = () => {
             })
             .catch(err => {
                 console.error('Error fetching questionnaire:', err);
-                toast.current.show({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to load questionnaire data',
-                    life: 3000
-                });
+                toast_error('Failed to load questionnaire data');
             });
     };
 
@@ -81,40 +78,17 @@ const QuestionnaireManagement = () => {
             accept: async () => {
                 try {
                     await deleteQuestionnaire(questionnaire.id);
-                    toast.current.show({ 
-                        severity: 'success', 
-                        summary: 'Deleted', 
-                        detail: 'Questionnaire deleted successfully',
-                        life: 3000
-                    });
+                    toast_success('Questionnaire deleted successfully');
                     loadData();
                 } catch {
-                    toast.current.show({ 
-                        severity: 'error', 
-                        summary: 'Error', 
-                        detail: 'Deletion failed',
-                        life: 3000
-                    });
+                    toast_error('Deletion failed');
                 }
             }
         });
     };
 
-    // const createQuestionnaireHandle = (payload) => {
-    //     console.log("payload", payload);
-    // }
-
-    // const updateQuestionnaireHandle = (id, payload) => {
-    //     console.log("---", id, payload)
-    // }
-
     const handleSaveSuccess = () => {
-        toast.current.show({
-            severity: 'success',
-            summary: 'Success',
-            detail: editingQuestionnaire ? 'Questionnaire updated' : 'Questionnaire created',
-            life: 3000
-        });
+        toast_success(editingQuestionnaire ? 'Questionnaire updated' : 'Questionnaire created');
         loadData();
         setDialogVisible(false);
     };
@@ -123,28 +97,28 @@ const QuestionnaireManagement = () => {
         <div className="flex gap-2">
             <Button 
                 icon="pi pi-pencil" 
-                className="p-button-rounded p-button-text p-button-primary" 
+                className="p-button-rounded p-button-primary" 
                 tooltip="Edit" 
                 tooltipOptions={{ position: 'top' }}
                 onClick={() => openEdit(rowData)} 
             />
             <Button 
                 icon="pi pi-users" 
-                className="p-button-rounded p-button-text p-button-help" 
+                className="p-button-rounded p-button-help" 
                 tooltip="Assign" 
                 tooltipOptions={{ position: 'top' }}
                 onClick={() => openAssign(rowData)} 
             />
             <Button 
                 icon="pi pi-eye" 
-                className="p-button-rounded p-button-text p-button-info" 
+                className="p-button-rounded p-button-info" 
                 tooltip="View Responses" 
                 tooltipOptions={{ position: 'top' }}
                 onClick={() => openResponses(rowData)} 
             />
             <Button 
                 icon="pi pi-trash" 
-                className="p-button-rounded p-button-text p-button-danger" 
+                className="p-button-rounded p-button-danger" 
                 tooltip="Delete" 
                 tooltipOptions={{ position: 'top' }}
                 onClick={() => handleDelete(rowData)} 
@@ -157,35 +131,33 @@ const QuestionnaireManagement = () => {
             <Badge 
                 value={`${rowData.assignments_count} assigned`} 
                 severity="info" 
-                size="large" 
+                size="small" 
             />
             <Badge 
                 value={`${rowData.responses_count} responses`} 
                 severity="success" 
-                size="large" 
+                size="small" 
             />
         </div>
     );
 
     const leftToolbarTemplate = () => (
-        <div className="flex align-items-center gap-2">
-            <h2 className="m-0">Questionnaires</h2>
+        <div style={{ display: 'flex' }}>
+            <h3 className="m-0">Questionnaires</h3>
             <Badge value={questionnaires.length} severity="info" />
         </div>
     );
 
     const rightToolbarTemplate = () => (
-        <Button 
-            label="New Questionnaire" 
+        <button 
             icon="pi pi-plus" 
-            className="p-button-raised"
+            className="btn btn-primary"
             onClick={openNew} 
-        />
+        >+ New Questionnaire</button>
     );
 
     return (
         <div className="p-4">
-            <Toast ref={toast} position="top-right" />
             <ConfirmDialog />
             
             <Card>
@@ -201,13 +173,12 @@ const QuestionnaireManagement = () => {
                     rows={10}
                     rowsPerPageOptions={[5, 10, 25]}
                     emptyMessage="No questionnaires found"
-                    selectionMode="single"
                     selection={selectedQuestionnaire}
                     onSelectionChange={(e) => setSelectedQuestionnaire(e.value)}
                     dataKey="id"
                     responsiveLayout="scroll"
                 >
-                    <Column field="id" header="ID" style={{ width: '5%' }} />
+                    <Column header="No" body={(_, { rowIndex }) => rowIndex + 1} style={{ width: '5%' }} />
                     <Column field="title" header="Title" sortable />
                     <Column field="description" header="Description" sortable />
                     <Column header="Status" body={statusTemplate} style={{ width: '25%' }} />

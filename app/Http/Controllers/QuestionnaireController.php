@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\{Questionnaire, Question, QuestionOption, QuestionnaireAssignment, AppUser};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Jobs\SendPushNotification;
 
 class QuestionnaireController extends Controller
 {
@@ -62,19 +63,32 @@ class QuestionnaireController extends Controller
         ]);
 
         $questionnaire = Questionnaire::findOrFail($id);
+        $participants = AppUser::whereIn('id', $request->participants)->get();
 
-        foreach ($request->participants as $pid) {
+        foreach ($participants as $participant) {
             QuestionnaireAssignment::firstOrCreate([
                 'questionnaire_id' => $id,
-                'participant_id' => $pid,
+                'participant_id' => $participant->id,
             ], [
                 'assigned_at' => now(),
             ]);
 
-            // Optional: Push notification logic
+            // Send push notification if token exists
+            if ($participant->fcm_token) {
+                $title = 'New Questionnaire Assigned';
+                $message = 'You have been assigned a new questionnaire: ' . $questionnaire->title;
+                $assignedData = $this->show($id);
+                SendPushNotification::dispatch(
+                    $participant->fcm_token,
+                    $title,
+                    $message,
+                    $questionnaire->id,
+                    $assignedData
+                );
+            }
         }
 
-        return response()->json(['message' => 'Questionnaire assigned successfully.']);
+        return response()->json(['message' => 'Questionnaire assigned successfully and notifications sent.', 'data' => $assignedData], 200);
     }
 
     public function show($id)

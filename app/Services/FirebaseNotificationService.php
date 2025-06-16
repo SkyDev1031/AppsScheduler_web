@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Http;
 
 class FirebaseNotificationService
 {
-    public static function sendNotificationWithToken($fcmToken, $title, $message, $studyId = 0, $actionType = 'notification', $payload = ["title" => 'title', "body" => 'Hello World']) 
+    public static function sendNotificationWithToken($fcmToken, $title, $message, $dataId = 0, $actionType = 'notification', $payload = ["title" => 'title', "body" => 'Hello World']) 
     {
         try {
             $client = new Client();
@@ -30,7 +30,7 @@ class FirebaseNotificationService
                         'actionType' => $actionType,
                         'title' => $title,
                         'body' => $message,
-                        'studyId' => (string) $studyId,
+                        'studyId' => (string) $dataId,
                         'payload' => $payloadJSON
                     ],
                     // 'notification' => [

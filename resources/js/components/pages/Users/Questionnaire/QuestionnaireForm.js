@@ -6,7 +6,7 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Divider } from 'primereact/divider';
 import QuestionEditor from './QuestionEditor';
 import { useGlobalContext } from '../../../contexts';
-import {createQuestionnaire, updateQuestionnaire} from '../../../api/QuestionnaireAPI'; // Adjust the import path as needed
+import { createQuestionnaire, updateQuestionnaire } from '../../../api/QuestionnaireAPI'; // Adjust the import path as needed
 
 const QuestionnaireForm = ({ visible, onHide, onSaveSuccess, questionnaire }) => {
     const { user } = useGlobalContext();
@@ -33,7 +33,7 @@ const QuestionnaireForm = ({ visible, onHide, onSaveSuccess, questionnaire }) =>
         }
 
         setIsSaving(true);
-        
+
         const payload = {
             title,
             description,
@@ -43,9 +43,7 @@ const QuestionnaireForm = ({ visible, onHide, onSaveSuccess, questionnaire }) =>
                 options: q.type === 'rating' ? [] : q.options.map(opt => opt.text)
             }))
         };
-        // console.log(questionnaire.id, payload)
-        // return;
-        const apiCall = questionnaire 
+        const apiCall = questionnaire
             ? updateQuestionnaire(questionnaire.id, payload)
             : createQuestionnaire(payload);
 
@@ -59,29 +57,26 @@ const QuestionnaireForm = ({ visible, onHide, onSaveSuccess, questionnaire }) =>
     };
 
     const footer = (
-        <div>
-            <Button 
-                label="Cancel" 
-                icon="pi pi-times" 
-                className="p-button-text" 
-                onClick={onHide} 
+        <div style={{ padding: '10px', margin: '10px' }}>
+            <button
+                className="btn btn-danger"
+                onClick={onHide}
                 disabled={isSaving}
-            />
-            <Button 
-                label="Save" 
-                icon="pi pi-check" 
-                onClick={handleSubmit} 
-                loading={isSaving}
+            >Cancel</button>
+            <button
+                className="btn btn-primary"
+                onClick={handleSubmit}
+                // loading={isSaving}
                 disabled={!title.trim() || isSaving}
-            />
+            >Save</button>
         </div>
     );
 
     return (
-        <Dialog 
-            visible={visible} 
-            onHide={onHide} 
-            header={questionnaire ? 'Edit Questionnaire' : 'Create New Questionnaire'} 
+        <Dialog
+            visible={visible}
+            onHide={onHide}
+            header={questionnaire ? 'Edit Questionnaire' : 'Create New Questionnaire'}
             style={{ width: '70vw' }}
             footer={footer}
             modal
@@ -91,10 +86,10 @@ const QuestionnaireForm = ({ visible, onHide, onSaveSuccess, questionnaire }) =>
                 <div className="col-12 md:col-6">
                     <div className="field">
                         <label htmlFor="title">Title*</label>
-                        <InputText 
-                            id="title" 
-                            value={title} 
-                            onChange={(e) => setTitle(e.target.value)} 
+                        <InputText
+                            id="title"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
                             placeholder="Enter questionnaire title"
                             className="w-full"
                         />
@@ -103,11 +98,11 @@ const QuestionnaireForm = ({ visible, onHide, onSaveSuccess, questionnaire }) =>
                 <div className="col-12">
                     <div className="field">
                         <label htmlFor="description">Description</label>
-                        <InputTextarea 
-                            id="description" 
-                            value={description} 
-                            onChange={(e) => setDescription(e.target.value)} 
-                            rows={3} 
+                        <InputTextarea
+                            id="description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            rows={3}
                             placeholder="Enter questionnaire description"
                             className="w-full"
                         />
@@ -122,9 +117,9 @@ const QuestionnaireForm = ({ visible, onHide, onSaveSuccess, questionnaire }) =>
                 </div>
             </Divider>
 
-            <QuestionEditor 
-                questions={questions} 
-                setQuestions={setQuestions} 
+            <QuestionEditor
+                questions={questions}
+                setQuestions={setQuestions}
             />
         </Dialog>
     );

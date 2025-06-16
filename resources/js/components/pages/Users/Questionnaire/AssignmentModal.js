@@ -5,15 +5,19 @@ import 'react-checkbox-tree/lib/react-checkbox-tree.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { getStudiesWithParticipants } from '../../../api/StudyAPI'; // or your path
 import { assignQuestionnaire } from '../../../api/QuestionnaireAPI'; // update this path as needed
+import { useGlobalContext } from '../../../contexts';
+import { toast_success } from '../../../utils';
 
 const AssignmentModal = ({ visible, onHide, questionnaire }) => {
     const [treeData, setTreeData] = useState([]);
     const [checked, setChecked] = useState([]);
     const [expanded, setExpanded] = useState([]);
+    const { setLoading } = useGlobalContext();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setLoading(true)
                 const response = await getStudiesWithParticipants();
                 if (response && response.data) {
                     const nodes = response.data.map((study) => ({
@@ -34,6 +38,8 @@ const AssignmentModal = ({ visible, onHide, questionnaire }) => {
                 console.error('Error fetching participant data:', err);
                 setTreeData([]);
                 setExpanded([]);
+            } finally {
+                setLoading(false)
             }
         };
 
@@ -45,9 +51,12 @@ const AssignmentModal = ({ visible, onHide, questionnaire }) => {
 
     const handleAssign = async () => {
         if (!questionnaire) return;
-
+        setLoading(true);
         try {
-            await assignQuestionnaire(questionnaire.id, checked);
+            const res = await assignQuestionnaire(questionnaire.id, checked);
+            console.log("assignRes", res)
+            toast_success(res.message)
+            setLoading(false);
             onHide();
         } catch (err) {
             console.error('Assignment failed:', err);

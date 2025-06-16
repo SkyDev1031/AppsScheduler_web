@@ -40,15 +40,15 @@ class Handler extends ExceptionHandler
         });
     }
     public function unauthenticated($request, AuthenticationException $exception)
-{
-    if ($request->expectsJson() || $request->is('api/*')) {
-        return response()->json([
-            'message' => 'Your personal access token expired',
-            'logout' => true,
-            'success' => false
-        ], 401); // use 401 for unauthorized
-    }
+    {
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'message' => 'Your personal access token expired',
+                'logout' => true,
+                'success' => false
+            ], 401); // use 401 for unauthorized
+        }
 
-    return redirect()->guest(route('login'));
-}
+        return redirect()->guest(route('login'));
+    }
 }
