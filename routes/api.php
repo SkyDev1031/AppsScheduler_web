@@ -44,6 +44,7 @@ Route::middleware('auth:api')->group(function () {
 
     
     Route::prefix('questionnaires')->group(function () {
+        Route::get('/', [QuestionnaireController::class, 'index']);
         Route::post('/', [QuestionnaireController::class, 'store']);
         Route::post('/{id}/assign', [QuestionnaireController::class, 'assignToParticipants']);
         Route::get('/{id}', [QuestionnaireController::class, 'show']);

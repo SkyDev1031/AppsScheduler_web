@@ -22,14 +22,14 @@ import { useNavigate } from 'react-router-dom';
 import MuiStudyGroupModal from './MuiStudyGroupModal';
 import InviteModal from './InviteModal';
 import StudyCard from './StudyCard';
-import { useGlobalContext } from "../../contexts";
+import { useGlobalContext } from "../../../contexts";
 import {
   createStudy,
   getStudies,
   cancelInviteParticipant,
   deleteStudy
-} from '../../api/StudyAPI';
-import { toast_error, toast_success } from '../../utils';
+} from '../../../api/StudyAPI';
+import { toast_error, toast_success } from '../../../utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faUser } from '@fortawesome/free-solid-svg-icons';
 

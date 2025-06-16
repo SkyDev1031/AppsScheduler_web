@@ -7,6 +7,21 @@ use Illuminate\Support\Facades\DB;
 
 class QuestionnaireController extends Controller
 {
+    public function index()
+    {
+        try {
+            $questionnaires = Questionnaire::withCount(['assignments', 'responses'])->latest()->get();
+
+            return response()->json(["data" => $questionnaires], 200);    
+        } 
+        catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error fetching questionnaires',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -64,13 +79,13 @@ class QuestionnaireController extends Controller
 
     public function show($id)
     {
-        return Questionnaire::with('questions.options')->findOrFail($id);
+        return response()->json(['data' => Questionnaire::with('questions.options')->findOrFail($id)], 200);
     }
 
     public function getResponses($id)
     {
         $questionnaire = Questionnaire::with('assignments.responses.question')->findOrFail($id);
-        return response()->json($questionnaire);
+        return response()->json(['data' => $questionnaire], 200);
     }
 
     public function summary()

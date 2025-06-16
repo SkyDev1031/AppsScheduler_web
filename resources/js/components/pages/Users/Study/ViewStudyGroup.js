@@ -10,12 +10,12 @@ import { FilterMatchMode } from 'primereact/api';
 import { Column } from 'primereact/column';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getApprovedParticipantsApi } from '../../api/ParticipantAPI.js';
-import {getAppUsageFreqApi, getAppUsageDurationApi, downloadCSV} from '../../api/AppClientAPI.js'
-import { _ERROR_CODES } from '../../config/index.js';
-import { useGlobalContext } from "../../contexts/index.js";
-import { toast_error, toast_warning } from '../../utils/index.js';
-import { encryptParam, decryptParam } from '../../utils/cryptoUtils.js'
+import { getApprovedParticipantsApi } from '../../../api/ParticipantAPI.js';
+import {getAppUsageFreqApi, getAppUsageDurationApi, downloadCSV} from '../../../api/AppClientAPI.js'
+import { _ERROR_CODES } from '../../../config/index.js';
+import { useGlobalContext } from "../../../contexts/index.js";
+import { toast_error, toast_warning } from '../../../utils/index.js';
+import { encryptParam, decryptParam } from '../../../utils/cryptoUtils.js'
 
 
 const _ACT_TYPE = {

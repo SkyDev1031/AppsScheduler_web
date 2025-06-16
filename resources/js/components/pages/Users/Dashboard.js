@@ -16,7 +16,7 @@ import {
   CircularProgress,
   Alert
 } from '@mui/material';
-import { getQuestionnaireSummary } from '../../api/QuestionaireAPI';
+import { getQuestionnaireSummary } from '../../api/QuestionnaireAPI';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 

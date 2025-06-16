@@ -22,4 +22,17 @@ class Questionnaire extends Model
     {
         return $this->belongsTo(User::class, 'researcher_id');
     }
+
+    public function responses()
+    {
+        return $this->hasManyThrough(
+            QuestionnaireResponse::class,
+            QuestionnaireAssignment::class,
+            'questionnaire_id',     // Foreign key on QuestionnaireAssignment
+            'assignment_id',        // Foreign key on QuestionnaireResponse
+            'id',                   // Local key on Questionnaire
+            'id'                    // Local key on QuestionnaireAssignment
+        );
+    }
+
 }

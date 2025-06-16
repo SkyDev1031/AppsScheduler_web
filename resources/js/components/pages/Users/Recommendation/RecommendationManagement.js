@@ -9,7 +9,7 @@ import { MultiSelect } from 'primereact/multiselect';
 import { Calendar } from 'primereact/calendar';
 import { Card } from 'primereact/card';
 import { Badge } from 'primereact/badge';
-import { toast_success, toast_error, confirmDialog } from '../../utils';
+import { toast_success, toast_error, confirmDialog } from '../../../utils';
 import StudyParticipantsModal from './StudyParticipantsModal';
 import {
     getRecommendationsApi,
@@ -18,10 +18,10 @@ import {
     updateRecommendationApi,
     getAppPackagesApi,
     sendToParticipantsApi
-} from '../../api/RecommendationAPI';
-import { useGlobalContext } from '../../contexts';
-import { _ERROR_CODES } from '../../config';
-import useAuth from '../../hooks/useAuth';
+} from '../../../api/RecommendationAPI';
+import { useGlobalContext } from '../../../contexts';
+import { _ERROR_CODES } from '../../../config';
+import useAuth from '../../../hooks/useAuth';
 
 // Days of week options
 const DAYS_OF_WEEK = [

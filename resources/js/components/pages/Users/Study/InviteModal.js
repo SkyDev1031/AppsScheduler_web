@@ -17,9 +17,9 @@ import {
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { inviteParticipant } from '../../api/StudyAPI';
-import { getParticipantsApi } from '../../api/ParticipantAPI';
-import { toast_error, toast_success } from '../../utils';
+import { inviteParticipant } from '../../../api/StudyAPI';
+import { getParticipantsApi } from '../../../api/ParticipantAPI';
+import { toast_error, toast_success } from '../../../utils';
 
 export default function InviteModal({ open, onClose, study, onInvited }) {
     const [participants, setParticipants] = useState([]);

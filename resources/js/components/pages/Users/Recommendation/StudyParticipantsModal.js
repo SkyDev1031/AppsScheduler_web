@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog } from 'primereact/dialog';
 import CheckboxTree from 'react-checkbox-tree';
 import 'react-checkbox-tree/lib/react-checkbox-tree.css';
-import { getStudiesWithParticipants } from '../../api/StudyAPI';
+import { getStudiesWithParticipants } from '../../../api/StudyAPI';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const StudyParticipantsModal = ({

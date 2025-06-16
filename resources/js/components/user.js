@@ -18,15 +18,15 @@ const Chat = lazy(() => import("./pages/Chat"))
 
 const UserNav = [
     { path: '/dashboard', Component: lazy(() => import("./pages/Users/Dashboard")) },
-    { path: '/study', Component: lazy(() => import("./pages/Users/StudyManagement")) },
-    { path: '/study/view/:studyId', Component: lazy(() => import("./pages/Users/ViewStudyGroup")) },
-    { path: '/reportApp/details/:encryptedPhoneNumber', Component: lazy(() => import("./pages/Users/ReportUserAppDetails")) },
-    { path: '/reportApp/details2/:encryptedPhoneNumber', Component: lazy(() => import("./pages/Users/ReportUserAppDetails2")) },
+    { path: '/study', Component: lazy(() => import("./pages/Users/Study/StudyManagement")) },
+    { path: '/study/view/:studyId', Component: lazy(() => import("./pages/Users/Study/ViewStudyGroup")) },
+    { path: '/reportApp/details/:encryptedPhoneNumber', Component: lazy(() => import("./pages/Users/Study/ReportUserAppDetails")) },
+    { path: '/reportApp/details2/:encryptedPhoneNumber', Component: lazy(() => import("./pages/Users/Study/ReportUserAppDetails2")) },
     { path: '/categories', Component: lazy(() => import("./pages/Users/CategoryManagement")) },
     { path: '/notifications', Component: lazy(() => import("./pages/Users/NotificationManagement")) },
     { path: '/sendtoparticipants', Component: lazy(() => import("./pages/Users/SendToParticipants")) },
-    { path: '/recommendations', Component: lazy(() => import("./pages/Users/RecommendationManagement")) },
-    { path: '/questionnaires', Component: lazy(() => import("./pages/Users/QuestionnaireManagement")) },
+    { path: '/recommendations', Component: lazy(() => import("./pages/Users/Recommendation/RecommendationManagement")) },
+    { path: '/questionnaires', Component: lazy(() => import("./pages/Users/Questionnaire/QuestionnaireManagement")) },
 ]
 function App() {
     const { _token, _user, isAdmin } = useAuth();
