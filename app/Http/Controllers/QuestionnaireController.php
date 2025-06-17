@@ -178,7 +178,12 @@ class QuestionnaireController extends Controller
 
     public function getResponses($id)
     {
-        $questionnaire = Questionnaire::with('assignments.responses.question')->findOrFail($id);
+        $questionnaire = Questionnaire::with([
+            'questions',
+            'assignments.participant',
+            'assignments.responses.question'
+        ])->findOrFail($id);
+    
         return response()->json(['data' => $questionnaire], 200);
     }
 

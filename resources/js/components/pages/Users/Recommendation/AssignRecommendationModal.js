@@ -5,7 +5,7 @@ import 'react-checkbox-tree/lib/react-checkbox-tree.css';
 import { getStudiesWithParticipants } from '../../../api/StudyAPI';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
-const StudyParticipantsModal = ({
+const AssignRecommendationModal = ({
     participantsModalOpen,
     setParticipantsModalOpen,
     handleSendRecommendation
@@ -56,12 +56,32 @@ const StudyParticipantsModal = ({
             header="Send Recommendation"
             modal
             className="study-participants-modal"
+            footer={
+                <div className="d-flex justify-content-end" style={{
+                    paddingTop: '1rem',
+                    borderTop: '1px solid #dee2e6' // Optional: adds a subtle separator line
+                }}>
+                    <button
+                        className="btn btn-secondary me-2"
+                        onClick={() => setParticipantsModalOpen(false)}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => handleSendRecommendation(checked)}
+                        disabled={checked.length === 0}
+                    >
+                        Send Recommendation
+                    </button>
+                </div>
+            }
         >
             <div className="modal-content-wrapper" style={{ 
                 height: '100%', 
                 display: 'flex', 
                 flexDirection: 'column',
-                justifyContent: 'space-between' // This ensures buttons stay at bottom
+                justifyContent: 'space-between' // This ensures content stays spaced
             }}>
                 <div className="tree-container" style={{ 
                     flex: 1, 
@@ -90,27 +110,9 @@ const StudyParticipantsModal = ({
                         </div>
                     )}
                 </div>
-                <div className="d-flex justify-content-end" style={{
-                    paddingTop: '1rem',
-                    borderTop: '1px solid #dee2e6' // Optional: adds a subtle separator line
-                }}>
-                    <button
-                        className="btn btn-secondary me-2"
-                        onClick={() => setParticipantsModalOpen(false)}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => handleSendRecommendation(checked)}
-                        disabled={checked.length === 0}
-                    >
-                        Send Recommendation
-                    </button>
-                </div>
             </div>
         </Dialog>
     );
 };
 
-export default StudyParticipantsModal;
+export default AssignRecommendationModal;

@@ -70,6 +70,26 @@ const AssignmentModal = ({ visible, onHide, questionnaire }) => {
             header={`Assign Questionnaire: ${questionnaire?.title || ''}`}
             modal
             className="assignment-modal"
+            footer={
+                <div className="d-flex justify-content-end" style={{
+                    paddingTop: '1rem',
+                    borderTop: '1px solid #dee2e6'
+                }}>
+                    <button
+                        className="btn btn-secondary me-2"
+                        onClick={onHide}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        className="btn btn-primary"
+                        onClick={handleAssign}
+                        disabled={checked.length === 0}
+                    >
+                        Assign
+                    </button>
+                </div>
+            }
         >
             <div className="modal-content-wrapper" style={{
                 height: '100%',
@@ -103,25 +123,6 @@ const AssignmentModal = ({ visible, onHide, questionnaire }) => {
                             <p className="text-muted">No participants available.</p>
                         </div>
                     )}
-                </div>
-
-                <div className="d-flex justify-content-end" style={{
-                    paddingTop: '1rem',
-                    borderTop: '1px solid #dee2e6'
-                }}>
-                    <button
-                        className="btn btn-secondary me-2"
-                        onClick={onHide}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        className="btn btn-primary"
-                        onClick={handleAssign}
-                        disabled={checked.length === 0}
-                    >
-                        Assign
-                    </button>
                 </div>
             </div>
         </Dialog>

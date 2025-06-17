@@ -1,24 +1,40 @@
 import React, { useEffect, useState } from 'react';
-import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   BarElement,
+  LineElement,
+  PointElement,
   CategoryScale,
   LinearScale,
   Tooltip,
   Legend,
+  ArcElement
 } from 'chart.js';
+import { Bar, Line, Pie } from 'react-chartjs-2';
 import {
   Box,
   Card,
   CardContent,
   Typography,
   CircularProgress,
-  Alert
+  Alert,
+  Grid,
+  Paper,
+  Divider
 } from '@mui/material';
 import { getQuestionnaireSummary } from '../../api/QuestionnaireAPI';
 
-ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+// Register all chart components
+ChartJS.register(
+  BarElement,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+  Tooltip,
+  Legend
+);
 
 export default function QuestionnaireDashboard() {
   const [summaryData, setSummaryData] = useState([]);
@@ -26,18 +42,15 @@ export default function QuestionnaireDashboard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    let isMounted = true; // Track mounted state
+    let isMounted = true;
     
     const fetchSummaryData = async () => {
       try {
         setLoading(true);
         setError(null);
         const response = await getQuestionnaireSummary();
-        // Only update state if component is still mounted
         if (isMounted) {
-          // Ensure response.data exists and is an array
           const data = Array.isArray(response?.data) ? response.data : [];
-          console.log(data)
           setSummaryData(data);
         }
       } catch (err) {
@@ -54,36 +67,90 @@ export default function QuestionnaireDashboard() {
 
     fetchSummaryData();
 
-    // Cleanup function to cancel pending requests
     return () => {
       isMounted = false;
     };
   }, []);
 
-  // Safe data mapping with fallbacks
-  const chartData = {
+  // Chart data calculations
+  const totalCompleted = summaryData.reduce((sum, item) => sum + (item?.completed || 0), 0);
+  const totalPending = summaryData.reduce((sum, item) => sum + (item?.pending || 0), 0);
+  const completionRate = totalCompleted + totalPending > 0 
+    ? Math.round((totalCompleted / (totalCompleted + totalPending)) * 100) 
+    : 0;
+
+  // Bar Chart Data
+  const barChartData = {
     labels: summaryData?.map(item => item?.title) || [],
     datasets: [
       {
         label: 'Completed',
         data: summaryData?.map(item => item?.completed || 0) || [],
-        backgroundColor: 'rgba(75, 192, 192, 0.8)',
-        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: '#4bc0c0',
+        borderColor: '#4bc0c0',
         borderWidth: 1,
       },
       {
         label: 'Pending',
         data: summaryData?.map(item => item?.pending || 0) || [],
-        backgroundColor: 'rgba(255, 99, 132, 0.8)',
-        borderColor: 'rgba(255, 99, 132, 1)',
+        backgroundColor: '#ff6384',
+        borderColor: '#ff6384',
         borderWidth: 1,
       }
     ],
   };
 
+  // Line Chart Data (Completion Trend)
+  const lineChartData = {
+    labels: summaryData?.map(item => item?.title) || [],
+    datasets: [
+      {
+        label: 'Completion Rate (%)',
+        data: summaryData?.map(item => {
+          const total = (item?.completed || 0) + (item?.pending || 0);
+          return total > 0 ? Math.round((item.completed / total) * 100) : 0;
+        }) || [],
+        borderColor: '#36a2eb',
+        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+        borderWidth: 2,
+        tension: 0.3,
+        fill: true
+      }
+    ]
+  };
+
+  // Pie Chart Data (Overall Status)
+  const pieChartData = {
+    labels: ['Completed', 'Pending'],
+    datasets: [{
+      data: [totalCompleted, totalPending],
+      backgroundColor: ['#4bc0c0', '#ff6384'],
+      borderWidth: 1
+    }]
+  };
+
+  // Common chart options
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `${context.dataset.label}: ${context.raw}` + 
+              (context.chart.data.labels[context.dataIndex] === 'Completion Rate (%)' ? '%' : '');
+          }
+        }
+      }
+    }
+  };
+
+  // Bar chart specific options
+  const barChartOptions = {
+    ...chartOptions,
     scales: {
       y: {
         beginAtZero: true,
@@ -97,19 +164,19 @@ export default function QuestionnaireDashboard() {
           display: false
         }
       }
-    },
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          boxWidth: 12,
-          padding: 20
-        }
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            return `${context.dataset.label}: ${context.raw}`;
+    }
+  };
+
+  // Line chart specific options
+  const lineChartOptions = {
+    ...chartOptions,
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100,
+        ticks: {
+          callback: function(value) {
+            return value + '%';
           }
         }
       }
@@ -118,45 +185,105 @@ export default function QuestionnaireDashboard() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Card elevation={3}>
-        <CardContent>
-          <Typography variant="h5" gutterBottom component="div">
-            Questionnaire Completion Overview
-          </Typography>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            Visual representation of completed vs pending questionnaires
-          </Typography>
+      <Grid container spacing={3}>
+        {/* Summary Cards */}
+        <Grid item xs={12} md={4}>
+          <Paper elevation={3} sx={{ p: 2, height: '100%' }}>
+            <Typography variant="h6" gutterBottom>
+              Total Questionnaires
+            </Typography>
+            <Typography variant="h3" color="primary">
+              {summaryData.length}
+            </Typography>
+          </Paper>
+        </Grid>
+        
+        <Grid item xs={12} md={4}>
+          <Paper elevation={3} sx={{ p: 2, height: '100%' }}>
+            <Typography variant="h6" gutterBottom>
+              Total Responses
+            </Typography>
+            <Typography variant="h3" color="secondary">
+              {totalCompleted + totalPending}
+            </Typography>
+          </Paper>
+        </Grid>
+        
+        <Grid item xs={12} md={4}>
+          <Paper elevation={3} sx={{ p: 2, height: '100%' }}>
+            <Typography variant="h6" gutterBottom>
+              Completion Rate
+            </Typography>
+            <Typography variant="h3" sx={{ color: completionRate >= 75 ? 'success.main' : 'warning.main' }}>
+              {completionRate}%
+            </Typography>
+          </Paper>
+        </Grid>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          {loading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" height={400}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <Box sx={{ height: 400, mt: 2 }}>
-              {summaryData?.length > 0 ? (
-                <Bar data={chartData} options={chartOptions} />
+        {/* Main Chart */}
+        <Grid item xs={12}>
+          <Card elevation={3}>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                Questionnaire Completion Status
+              </Typography>
+              {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {error}
+                </Alert>
+              )}
+              {loading ? (
+                <Box display="flex" justifyContent="center" alignItems="center" height={400}>
+                  <CircularProgress />
+                </Box>
               ) : (
-                <Box 
-                  display="flex" 
-                  justifyContent="center" 
-                  alignItems="center" 
-                  height="100%"
-                >
-                  <Typography variant="body1" color="text.secondary">
-                    {error ? 'Error loading data' : 'No questionnaire data available'}
-                  </Typography>
+                <Box sx={{ height: 400 }}>
+                  {summaryData?.length > 0 ? (
+                    <Bar data={barChartData} options={barChartOptions} />
+                  ) : (
+                    <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                      <Typography variant="body1" color="text.secondary">
+                        {error ? 'Error loading data' : 'No questionnaire data available'}
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
               )}
-            </Box>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Additional Charts */}
+        <Grid item xs={12} md={6}>
+          <Card elevation={3}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Completion Rate Trend
+              </Typography>
+              <Box sx={{ height: 300 }}>
+                {summaryData?.length > 0 && (
+                  <Line data={lineChartData} options={lineChartOptions} />
+                )}
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Card elevation={3}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Overall Status
+              </Typography>
+              <Box sx={{ height: 300 }}>
+                {summaryData?.length > 0 && (
+                  <Pie data={pieChartData} options={chartOptions} />
+                )}
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
     </Box>
   );
 }
