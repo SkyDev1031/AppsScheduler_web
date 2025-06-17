@@ -298,8 +298,14 @@ class AppUserController extends Controller
             ]);
         }
 
-        QuestionnaireAssignment::where('id', $data['assignment_id'])->update(['completed_at' => now()]);
+        try {
+            QuestionnaireAssignment::where('id', $data['assignment_id'])->update(['completed_at' => now()]);
+            return response()->json(['message' => 'Responses submitted successfully', 'isSuccessful' => true]);
+        }
+        catch (\Exception $e) {
+            Log::error("Error submitting responses: " . $e->getMessage());
+            return response()->json(['message' => 'Failed to submit responses', 'isSuccessful' => false], 500);
+        }
 
-        return response()->json(['message' => 'Responses submitted successfully']);
     }
 }

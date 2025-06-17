@@ -66,7 +66,7 @@ class QuestionnaireController extends Controller
         $participants = AppUser::whereIn('id', $request->participants)->get();
 
         foreach ($participants as $participant) {
-            QuestionnaireAssignment::firstOrCreate([
+            $assignment = QuestionnaireAssignment::firstOrCreate([
                 'questionnaire_id' => $id,
                 'participant_id' => $participant->id,
             ], [
@@ -78,11 +78,13 @@ class QuestionnaireController extends Controller
                 $title = 'New Questionnaire Assigned';
                 $message = 'You have been assigned a new questionnaire: ' . $questionnaire->title;
                 $assignedData = $this->show($id);
+                // return json_encode($assignedData);
                 SendPushNotification::dispatch(
                     $participant->fcm_token,
                     $title,
                     $message,
-                    $questionnaire->id,
+                    $assignment->id,
+                    "questionnaire_assigned",
                     $assignedData
                 );
             }

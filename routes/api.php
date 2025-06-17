@@ -34,7 +34,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/{study}',                      [StudyController::class, 'show']);
         Route::put('/{study}',                      [StudyController::class, 'update']);
         Route::delete('/{study}',                   [StudyController::class, 'destroy']);
-        Route::post('/with-participants',               [StudyController::class, 'getStudiesWithParticipants']);
+        Route::post('/with-participants',           [StudyController::class, 'getStudiesWithParticipants']);
     });
 
     Route::prefix('study-requests')->group(function () {
@@ -44,14 +44,14 @@ Route::middleware('auth:api')->group(function () {
 
     
     Route::prefix('questionnaires')->group(function () {
-        Route::get('/', [QuestionnaireController::class, 'index']);
-        Route::post('/', [QuestionnaireController::class, 'store']);
-        Route::post('/{id}/assign', [QuestionnaireController::class, 'assignToParticipants']);
-        Route::get('/{id}', [QuestionnaireController::class, 'show']);
-        Route::put('/{id}', [QuestionnaireController::class, 'update']);
-        Route::delete('/{id}', [QuestionnaireController::class, 'destroy']);
-        Route::get('/{id}/responses', [QuestionnaireController::class, 'getResponses']);
-        Route::post('/summary', [QuestionnaireController::class, 'summary']);
+        Route::get('/',                             [QuestionnaireController::class, 'index']);
+        Route::post('/',                            [QuestionnaireController::class, 'store']);
+        Route::post('/{id}/assign',                 [QuestionnaireController::class, 'assignToParticipants']);
+        Route::get('/{id}',                         [QuestionnaireController::class, 'show']);
+        Route::put('/{id}',                         [QuestionnaireController::class, 'update']);
+        Route::delete('/{id}',                      [QuestionnaireController::class, 'destroy']);
+        Route::get('/{id}/responses',               [QuestionnaireController::class, 'getResponses']);
+        Route::post('/summary',                     [QuestionnaireController::class, 'summary']);
     });
 
 });
@@ -149,5 +149,5 @@ Route::prefix('recommendations')->group(function () {
 });
 
 
-Route::get('/participants/{id}/questionnaires', [AppUserController::class, 'getAssignedQuestionnaires']);
-Route::post('/questionnaire-responses', [AppUserController::class, 'submitResponses']); 
+Route::get('/participants/{id}/questionnaires',     [AppUserController::class, 'getAssignedQuestionnaires']);
+Route::post('/questionnaire-responses',             [AppUserController::class, 'submitResponses']); 

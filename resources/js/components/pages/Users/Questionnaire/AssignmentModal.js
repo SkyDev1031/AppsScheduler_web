@@ -54,7 +54,6 @@ const AssignmentModal = ({ visible, onHide, questionnaire }) => {
         setLoading(true);
         try {
             const res = await assignQuestionnaire(questionnaire.id, checked);
-            console.log("assignRes", res)
             toast_success(res.message)
             setLoading(false);
             onHide();

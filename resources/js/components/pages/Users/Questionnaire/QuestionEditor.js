@@ -75,7 +75,7 @@ const QuestionEditor = ({ questions, setQuestions }) => {
                 </div>
             )}
 
-            <Accordion multiple activeIndex={[...Array(questions.length).keys()]}>
+            <Accordion multiple activeIndex={[]}>
                 {questions.map((q, index) => (
                     <AccordionTab 
                         key={index} 
@@ -109,7 +109,7 @@ const QuestionEditor = ({ questions, setQuestions }) => {
                             </div>
 
                             {(q.type === 'single_choice' || q.type === 'multi_choice') && (
-                                <Fieldset legend="Options" className="mt-3">
+                                <Fieldset legend="Options" className="mt-3" style={{ width: '80%', margin: 'auto' }}>
                                     {q.options.map((opt, oIndex) => (
                                         <div key={oIndex} className="flex align-items-center gap-2 mb-2" style={{ display: 'flex' }}>
                                             <InputText
@@ -126,12 +126,14 @@ const QuestionEditor = ({ questions, setQuestions }) => {
                                             />
                                         </div>
                                     ))}
-                                    <Button
-                                        label="Add Option"
-                                        icon="pi pi-plus"
-                                        className="p-button-sm"
-                                        onClick={() => addOption(index)}
-                                    />
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                        <Button
+                                            label="+ Add Option"
+                                            style={{ width: '20%' }}
+                                            className="p-button-sm"
+                                            onClick={() => addOption(index)}
+                                        />
+                                    </div>
                                 </Fieldset>
                             )}
 
@@ -149,20 +151,18 @@ const QuestionEditor = ({ questions, setQuestions }) => {
                                 </div>
                             )}
 
-                            <div className="flex justify-end mt-3">
-                                <Button 
-                                    label="Remove Question" 
-                                    icon="pi pi-trash" 
-                                    className="p-button-danger" 
+                            <div className="flex justify-end mt-3" style={{ display: 'flex', justifyContent: 'end' }}>
+                                <button 
+                                    className="btn btn-danger" 
                                     onClick={() => removeQuestion(index)} 
-                                />
+                                >Remove Question</button>
                             </div>
                         </Card>
                     </AccordionTab>
                 ))}
             </Accordion>
 
-            <div className="flex justify-between mt-4">
+            <div className="flex justify-between mt-4" style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Button 
                     label="+ Add Question" 
                     // icon="pi pi-plus" 

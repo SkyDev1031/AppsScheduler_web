@@ -57,18 +57,18 @@ const QuestionnaireForm = ({ visible, onHide, onSaveSuccess, questionnaire }) =>
     };
 
     const footer = (
-        <div style={{ padding: '10px', margin: '10px' }}>
-            <button
-                className="btn btn-danger"
+        <div style={{ padding: '5px', margin: '5px' }}>
+            <Button
+                className="p-button-raised p-btn-danger"
                 onClick={onHide}
                 disabled={isSaving}
-            >Cancel</button>
-            <button
-                className="btn btn-primary"
+            >Cancel</Button>
+            <Button
+                className="p-button-raised"
                 onClick={handleSubmit}
                 // loading={isSaving}
                 disabled={!title.trim() || isSaving}
-            >Save</button>
+            >Save</Button>
         </div>
     );
 
@@ -102,7 +102,7 @@ const QuestionnaireForm = ({ visible, onHide, onSaveSuccess, questionnaire }) =>
                             id="description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            rows={3}
+                            rows={1}
                             placeholder="Enter questionnaire description"
                             className="w-full"
                         />
@@ -111,8 +111,7 @@ const QuestionnaireForm = ({ visible, onHide, onSaveSuccess, questionnaire }) =>
             </div>
 
             <Divider align="left">
-                <div className="inline-flex align-items-center">
-                    <i className="pi pi-question-circle mr-2"></i>
+                <div className="inline-flex align-items-center" style={{ display: 'inline-flex', alignItems: 'center' }}>
                     <span className="font-bold">Questions</span>
                 </div>
             </Divider>

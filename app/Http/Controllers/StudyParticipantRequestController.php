@@ -121,7 +121,6 @@ class StudyParticipantRequestController extends Controller
     
         $appUserId = (int) $id;
         $studyId = (int) $request->study_id;
-    
         $invite = StudyParticipantRequest::where('participant_id', $appUserId)
                                          ->where('study_id', $studyId)
                                          ->whereIn('study_status', ['Pending', 'Declined'])
@@ -132,7 +131,7 @@ class StudyParticipantRequestController extends Controller
         }
     
         $invite->update(['study_status' => 'Approved']);
-        event(new StudyInviteStatusUpdated($studyId, $appUserId, 'Approved'));
+        // event(new StudyInviteStatusUpdated($studyId, $appUserId, 'Approved'));
 
         // Optionally notify the researcher
         // Notification::send($invite->study->researcher, new InviteStatusNotification($invite));

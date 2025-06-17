@@ -30,7 +30,7 @@ class FirebaseNotificationService
                         'actionType' => $actionType,
                         'title' => $title,
                         'body' => $message,
-                        'studyId' => (string) $dataId,
+                        'dataId' => (string) $dataId,
                         'payload' => $payloadJSON
                     ],
                     // 'notification' => [
