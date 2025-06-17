@@ -11,6 +11,7 @@ import { useGlobalContext } from "../../contexts";
 import { toast_success, toast_error } from '../../utils/index.js';
 import { _ERROR_CODES } from '../../config';
 import { Menu } from 'primereact/menu';
+import { Badge } from 'primereact/badge'; // Import Badge component
 
 const SendToParticipants = () => {
     const [participants, setParticipants] = useState([]);
@@ -98,24 +99,21 @@ const SendToParticipants = () => {
     };
 
     const statusBadge = (rowData) => {
+        const severity = rowData.status === 'Active' ? 'success' :
+                         rowData.status === 'Disenrolled' ? 'danger' : 'warning';
         return (
-            <span
-                className={`${rowData.status === 'Active'
-                        ? 'bg-primary text-white'
-                        : rowData.status === 'Disenrolled'
-                            ? 'bg-danger text-white'
-                            : 'bg-warning text-white'
-                    } px-2 py-1 rounded`}
-            >
-                {rowData.status}
-            </span>
+            <Badge 
+                value={rowData.status} 
+                severity={severity} 
+                size="small" 
+            />
         );
     };
 
     const noTemplate = (_, { rowIndex }) => <span>{rowIndex + 1}</span>;
 
     return (
-        <div>
+        <div className='container'>
             <h3>Send To Participants</h3>
             <DataTable
                 value={participants}
@@ -172,7 +170,7 @@ const SendToParticipants = () => {
                     header="Actions"
                     body={(rowData) => (
                         <Button
-                            label="Send"
+                            icon="pi pi-send"
                             className="p-button-primary p-button-sm"
                             onClick={() => openSendModal(rowData)}
                         />
