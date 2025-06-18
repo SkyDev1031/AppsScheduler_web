@@ -44,7 +44,6 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $userId = $request->user_id;
-        return $request;
         if (!$userId) {
             // Return all notifications joined with appusers
             $notifications = DB::table('notifications')

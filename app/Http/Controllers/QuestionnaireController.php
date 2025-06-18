@@ -66,15 +66,16 @@ class QuestionnaireController extends Controller
         $participants = AppUser::whereIn('id', $request->participants)->get();
 
         foreach ($participants as $participant) {
-            $assignment = QuestionnaireAssignment::firstOrCreate([
-                'questionnaire_id' => $id,
-                'participant_id' => $participant->id,
-            ], [
-                'assigned_at' => now(),
-            ]);
 
             // Send push notification if token exists
             if ($participant->fcm_token) {
+                $assignment = QuestionnaireAssignment::firstOrCreate([
+                    'questionnaire_id' => $id,
+                    'participant_id' => $participant->id,
+                ], [
+                    'assigned_at' => now(),
+                ]);
+    
                 $title = 'New Questionnaire Assigned';
                 $message = 'You have been assigned a new questionnaire: ' . $questionnaire->title;
                 $assignedData = $this->show($id);

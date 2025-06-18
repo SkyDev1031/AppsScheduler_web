@@ -181,7 +181,7 @@ const ResponseViewer = ({ visible, onHide, questionnaire }) => {
                     </div>
                 </div>
             } 
-            style={{ width: '70vw', height: '70vh' }} // Fixed height
+            style={{ width: '85vw', height: '85vh' }} // Fixed height
             breakpoints={{ '960px': '85vw', '640px': '95vw' }}
             modal
             className="p-fluid"

@@ -8,7 +8,7 @@ import { assignQuestionnaire } from '../../../api/QuestionnaireAPI'; // update t
 import { useGlobalContext } from '../../../contexts';
 import { toast_success } from '../../../utils';
 
-const AssignmentModal = ({ visible, onHide, questionnaire }) => {
+const AssignmentModal = ({ visible, onHide, questionnaire, onAssignSuccess }) => {
     const [treeData, setTreeData] = useState([]);
     const [checked, setChecked] = useState([]);
     const [expanded, setExpanded] = useState([]);
@@ -55,10 +55,14 @@ const AssignmentModal = ({ visible, onHide, questionnaire }) => {
         try {
             const res = await assignQuestionnaire(questionnaire.id, checked);
             toast_success(res.message)
+            onAssignSuccess();
             setLoading(false);
             onHide();
         } catch (err) {
             console.error('Assignment failed:', err);
+            toast_success("This participant can't be receive assignment due to fcm_token!")
+            setLoading(false);
+            onHide();
         }
     };
 
