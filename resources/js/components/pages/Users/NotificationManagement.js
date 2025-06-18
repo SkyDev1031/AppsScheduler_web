@@ -20,9 +20,10 @@ const NotificationManagement = () => {
         const fetchNotifications = async () => {
             setLoading(true);
             try {
+                clearNotifications()
                 const response = await getNotificationsApi(); // Replace with your API call
                 if (isMounted.current) {
-                    response.data.forEach((notification) => addNotification(notification)); // Add notifications to context
+                    response.data.forEach((res) => addNotification(res)); // Add notifications to context
                 }
             } catch (err) {
                 if (isMounted.current) {

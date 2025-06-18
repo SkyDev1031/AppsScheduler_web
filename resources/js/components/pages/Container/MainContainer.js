@@ -8,11 +8,13 @@ import { Header } from "../../components";
 import { AdminNavbar, UserNavbar } from "../../config";
 import { useGlobalContext } from "../../contexts";
 import { useAuth } from "../../hooks";
+import NotificationsSocket from '../../NotificationSocket';
+import { toast_success, toast_error } from '../../utils';
 
 const MainContainer = () => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, _user } = useAuth();
   const { pathname: location } = useLocation();
-  const { loading } = useGlobalContext();
+  const { loading, addNotification } = useGlobalContext();
 
   const _role_prefix = isAdmin ? '/admin' : '/user';
   const subNav = (isAdmin ? AdminNavbar : UserNavbar).find(item => location.startsWith(`${_role_prefix}/${item.prefix || item.link}`));
@@ -20,6 +22,19 @@ const MainContainer = () => {
 
   return (
     <>
+      <NotificationsSocket
+        userId={_user.id}
+        onMessage={(res) => {
+          console.log("New notification received:", res);
+
+          // Add notification to global context
+          addNotification(res.message);
+
+          // Show toast notification
+          toast_success('New Notification: ' + (res?.message?.title || 'You got a message'));
+        }}
+      />
+
       <Header
         isSubItem={isSubItem}
         location={location}

@@ -2,7 +2,6 @@ import { useMetaMask } from "metamask-react";
 import { confirmDialog, ConfirmDialog } from "primereact";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import Web3 from "web3";
-import { getContractsApi, getCryptosApi, getSettingsApi, getTransactionApi, pwdCheckApi } from "../api/OriginAPI.js";
 import { contractABI, minABI, _ERROR_CODES, _NETWORK_CHAINS, _TESTING } from "../config";
 import { useAuth } from "../hooks";
 import { toast_error } from "../utils";
@@ -13,7 +12,6 @@ export const useGlobalContext = () => useContext(GlobalContext);
 export const GlobalContextProvider = ({ children }) => {
     const { _user, _token, isAdmin, refreshUser } = useAuth();
     const [loading, setLoading] = useState(false)
-    const { status, connect, account, chainId, addChain, switchChain, ethereum } = useMetaMask();
     const [conf2ndPwd, setConf2ndPwd] = useState(false)
     const [transactions, setTransactions] = useState([])
     const [holdings, setHoldings] = useState([])

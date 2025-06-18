@@ -4,7 +4,7 @@ import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
-import { GlobalContextProvider, useGlobalContext } from './contexts';
+import { GlobalContextProvider } from './contexts';
 import { ChatContextProvider } from './Chat';
 import { useAuth } from './hooks';
 import { Navigate } from './utils';
@@ -32,7 +32,6 @@ const UserNav = [
 ]
 function App() {
     const { _token, _user, isAdmin } = useAuth();
-    const { addNotification } = useGlobalContext(); // Access addNotification from GlobalContext
 
     const SecurityRouter = ({ Component, auth, userRole, adminRole, params = {} }) => {
         if (!auth && _token) return <Navigate to={isAdmin ? '/admin' : '/user'} />;
@@ -46,18 +45,6 @@ function App() {
             <GlobalContextProvider>
                 <ToastContainer />
                 <Suspense fallback={<div className="preloader react-preloader"></div>}>
-                    <NotificationsSocket
-                        userId={_user.id}
-                        onMessage={(res) => {
-                            console.log("New notification received:", res);
-
-                            // Add notification to global context
-                            addNotification(res.message);
-
-                            // Show toast notification
-                            toast_success('New Notification: ' + (res?.message?.title || 'You got a message'));
-                        }}
-                    />
                     <Routes>
                         <Route path="/user" element={<MainContainer />}>
                             <Route index element={<Navigate to={'/user/dashboard'} />} />
@@ -76,6 +63,7 @@ function App() {
                         </Route>
                     </Routes>
                 </Suspense>
+
             </GlobalContextProvider>
         </BrowserRouter>
     );
@@ -83,9 +71,7 @@ function App() {
 if (document.getElementById('app')) {
     ReactDOM.render(
         <React.StrictMode>
-            <MetaMaskProvider>
-                <App />
-            </MetaMaskProvider>
+            <App />
         </React.StrictMode>,
         document.getElementById('app')
     );
