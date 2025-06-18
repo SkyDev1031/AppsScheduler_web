@@ -10,6 +10,8 @@ import { useAuth } from './hooks';
 import { Navigate } from './utils';
 import { MESSAGE_SERVER } from './config';
 import 'primeicons/primeicons.css';
+import NotificationsSocket from './NotificationSocket';
+import { toast_success, toast_error } from './utils';
 
 const BaseContainer = lazy(() => import("./pages/Container/BaseContainer"))
 const MainContainer = lazy(() => import("./pages/Container/MainContainer"))
@@ -46,6 +48,12 @@ function App() {
                     server_url={MESSAGE_SERVER}> */}
                 <ToastContainer />
                 <Suspense fallback={<div className="preloader react-preloader"></div>}>
+                    <NotificationsSocket
+                        userId={_user.id}
+                        onMessage={(res) => {
+                            console.log("New notification received:", res);
+                            toast_success('New Notification: ' + res?.message.title || 'You got a message');
+                        }} />
                     <Routes>
                         {/* <Route path="/user" element={<SecurityRouter Component={BaseContainer} auth userRole />}>
                                 <Route path="/user/chat" element={<Chat />} />

@@ -4,21 +4,37 @@ import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { FilterMatchMode } from 'primereact/api';
-import { getNotificationsApi, deleteNotificationApi, markAsReadApi, createNotificationApi } from '../../api/NotificationAPI';
+import { deleteNotificationApi, markAsReadApi, getNotificationsApi, clearNotificationApi } from '../../api/NotificationAPI';
 import { useGlobalContext } from "../../contexts";
 import { toast_success, toast_error } from '../../utils';
 import { _ERROR_CODES } from '../../config';
 import useAuth from '../../hooks/useAuth';
-import NotificationsSocket from '../../NotificationSocket';
 
 const NotificationManagement = () => {
-    const [notifications, setNotifications] = useState([]);
     const [query, setQuery] = useState('');
-    const { setLoading, confirmDialog } = useGlobalContext();
+    const { notifications, addNotification, clearNotifications, setLoading, confirmDialog } = useGlobalContext();
     const isMounted = useRef(true);
-    const { _token, _user } = useAuth();
+    const { _user } = useAuth();
 
     useEffect(() => {
+        const fetchNotifications = async () => {
+            setLoading(true);
+            try {
+                const response = await getNotificationsApi(); // Replace with your API call
+                if (isMounted.current) {
+                    response.data.forEach((notification) => addNotification(notification)); // Add notifications to context
+                }
+            } catch (err) {
+                if (isMounted.current) {
+                    toast_error(err, _ERROR_CODES.NETWORK_ERROR);
+                }
+            } finally {
+                if (isMounted.current) {
+                    setLoading(false);
+                }
+            }
+        };
+
         isMounted.current = true;
         fetchNotifications();
 
@@ -26,32 +42,6 @@ const NotificationManagement = () => {
             isMounted.current = false;
         };
     }, []);
-	const createNotification = async () => {
-		const res = await createNotificationApi({
-			id_appuser: 5,
-			title: "Test",
-			content: "This is test notification."
-		});
-		console.log(res);
-	}
-
-    const fetchNotifications = async () => {
-        setLoading(true);
-        try {
-            const res = await getNotificationsApi(_user.id);
-            if (isMounted.current) {
-                setNotifications(res.data || []);
-            }
-        } catch (err) {
-            if (isMounted.current) {
-                toast_error(err, _ERROR_CODES.NETWORK_ERROR);
-            }
-        } finally {
-            if (isMounted.current) {
-                setLoading(false);
-            }
-        }
-    };
 
     const handleDelete = async (notification) => {
         const isDelete = await confirmDialog('Are you sure you want to delete this notification?');
@@ -61,7 +51,10 @@ const NotificationManagement = () => {
         try {
             await deleteNotificationApi(notification.id);
             if (isMounted.current) {
-                setNotifications(prev => prev.filter(n => n.id !== notification.id));
+                // Remove the specific notification from the context
+                const updatedNotifications = notifications.filter((n) => n.id !== notification.id);
+                clearNotifications(); // Clear existing notifications
+                updatedNotifications.forEach((n) => addNotification(n)); // Add updated notifications
                 toast_success('Notification deleted successfully');
             }
         } catch (err) {
@@ -80,16 +73,14 @@ const NotificationManagement = () => {
 
         setLoading(true);
         try {
-            // Add your mark as read API call here if available
             await markAsReadApi(notification.id);
             if (isMounted.current) {
-                setNotifications(prev =>
-                    prev.map(n =>
-                        n.id === notification.id
-                            ? { ...n, read_status: true, read_time: n.read_time || new Date().toISOString() }
-                            : n
-                    )
+                // Update the specific notification in the context
+                const updatedNotifications = notifications.map((n) =>
+                    n.id === notification.id ? { ...n, read_status: true, read_time: new Date().toISOString() } : n
                 );
+                clearNotifications(); // Clear existing notifications
+                updatedNotifications.forEach((n) => addNotification(n)); // Add updated notifications
                 toast_success('Notification marked as read');
             }
         } catch (err) {
@@ -102,6 +93,22 @@ const NotificationManagement = () => {
             }
         }
     };
+
+    const clearAll = async () => {
+        const isDelete = await confirmDialog('Are you sure you want to clear all notifications?');
+        if(!isDelete) return;
+        clearNotificationApi().then((res) => {
+            if(res.success == true) {
+                clearNotifications()
+                toast_success(res.message)
+            }
+            else {
+                toast_error(res.message)            
+            }                
+        }).catch(err => {
+            toast_error(err)
+        })
+    }
 
     const formatDateTime = (dateString) => {
         if (!dateString) return '-';
@@ -138,22 +145,12 @@ const NotificationManagement = () => {
         </div>
     );
 
-    return (<>
-        <NotificationsSocket
-            userId={_user.id}
-            onMessage={(res) => {
-                console.log("New notification received:", res);
-                setNotifications((prev) => [res?.message, ...prev]); // prepend new res
-                // Optional: Show a toast notification
-                toast_success('New Notification: ' + res?.message.title || 'You got a message');
-            }}
-        />
-
+    return (
         <div className="p-4">
             <h3 className="mb-4">Notification Management</h3>
 
             <DataTable
-                value={notifications}
+                value={notifications} // Use notifications from context
                 responsiveLayout="scroll"
                 paginator
                 resizableColumns
@@ -170,8 +167,9 @@ const NotificationManagement = () => {
                 header={
                     <div className='d-flex'>
                         <div className="me-auto p-2">
-                            <button label='Reload' onClick={fetchNotifications} className="btn btn-default"><i className='fa fa-refresh' /> Reload</button>
-					        {/* <button onClick={createNotification} className="btn btn-default">Test Create</button> */}
+                            <button label='Clear All' onClick={clearAll} className="btn btn-default">
+                                <i className='fa fa-trash' /> Clear All
+                            </button>
                         </div>
                         <div className="p-2">
                             <span className="p-input-icon-left">
@@ -219,18 +217,6 @@ const NotificationManagement = () => {
                     sortable
                     body={(rowData) => formatDateTime(rowData.read_time)}
                 />
-                {/* <Column
-                    field="read_status"
-                    header="Status"
-                    sortable
-                    body={(rowData) => (
-                        <span
-                            className={`pi ${rowData.read_status ? 'pi-check-circle text-green-600' : 'pi-exclamation-circle text-yellow-500'}`}
-                            title={rowData.read_status ? 'Read' : 'Unread'}
-                            style={{ fontSize: '1.2rem' }}
-                        ></span>
-                    )}
-                /> */}
                 <Column
                     header="Actions"
                     body={actionButtons}
@@ -238,7 +224,6 @@ const NotificationManagement = () => {
                 />
             </DataTable>
         </div>
-    </>
     );
 };
 

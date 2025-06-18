@@ -232,6 +232,24 @@ class NotificationController extends Controller
         }
     }
 
+    public function clear()
+    {
+        try {
+            // Delete all notifications
+            Notification::truncate();
+    
+            return response()->json([
+                'message' => 'All notifications cleared successfully.',
+                'success' => true,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'There was a problem clearing notifications. Please try again.',
+                'success' => false,
+            ], 500);
+        }
+    }
+
     public function markAsRead($id)
     {
         $notification = Notification::find($id);
