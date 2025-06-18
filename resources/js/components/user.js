@@ -4,7 +4,7 @@ import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
-import { GlobalContextProvider } from './contexts';
+import { GlobalContextProvider, useGlobalContext } from './contexts';
 import { ChatContextProvider } from './Chat';
 import { useAuth } from './hooks';
 import { Navigate } from './utils';
@@ -32,33 +32,33 @@ const UserNav = [
 ]
 function App() {
     const { _token, _user, isAdmin } = useAuth();
+    const { addNotification } = useGlobalContext(); // Access addNotification from GlobalContext
+
     const SecurityRouter = ({ Component, auth, userRole, adminRole, params = {} }) => {
         if (!auth && _token) return <Navigate to={isAdmin ? '/admin' : '/user'} />;
         if (auth && !_token) return <Navigate to={'/login'} />;
-        if ((!userRole && !adminRole) || (userRole && !isAdmin) || (adminRole && isAdmin)) return <Component {...params} />
+        if ((!userRole && !adminRole) || (userRole && !isAdmin) || (adminRole && isAdmin)) return <Component {...params} />;
         return <Navigate to={'/'} />;
-    }
+    };
+
     return (
         <BrowserRouter>
             <GlobalContextProvider>
-                {/* <ChatContextProvider
-                    user={_user}
-                    client_id={'test_client_id'}
-                    client_secret={'test_client_secret'}
-                    server_url={MESSAGE_SERVER}> */}
                 <ToastContainer />
                 <Suspense fallback={<div className="preloader react-preloader"></div>}>
                     <NotificationsSocket
                         userId={_user.id}
                         onMessage={(res) => {
                             console.log("New notification received:", res);
-                            toast_success('New Notification: ' + res?.message.title || 'You got a message');
-                        }} />
+
+                            // Add notification to global context
+                            addNotification(res.message);
+
+                            // Show toast notification
+                            toast_success('New Notification: ' + (res?.message?.title || 'You got a message'));
+                        }}
+                    />
                     <Routes>
-                        {/* <Route path="/user" element={<SecurityRouter Component={BaseContainer} auth userRole />}>
-                                <Route path="/user/chat" element={<Chat />} />
-                                <Route path="/user/chat/:chatkey" element={<Chat />} />
-                            </Route> */}
                         <Route path="/user" element={<MainContainer />}>
                             <Route index element={<Navigate to={'/user/dashboard'} />} />
                             {UserNav.map((item, index) => (
@@ -76,10 +76,9 @@ function App() {
                         </Route>
                     </Routes>
                 </Suspense>
-                {/* </ChatContextProvider> */}
             </GlobalContextProvider>
         </BrowserRouter>
-    )
+    );
 }
 if (document.getElementById('app')) {
     ReactDOM.render(
