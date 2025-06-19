@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AppController;
-use App\Http\Controllers\ApiController;
 use App\Http\Controllers\AppUserController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StudyController;
@@ -42,6 +41,24 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/cancel',                      [StudyParticipantRequestController::class, 'cancel']);   // researcher
     });    
 
+    Route::prefix('categories')->group(function () {
+        Route::get('/',                                 [CategoryController::class, 'index']);
+        Route::post('/',                                [CategoryController::class, 'store']);
+        Route::get('/{id}',                             [CategoryController::class, 'show']);
+        Route::put('/{id}',                             [CategoryController::class, 'update']);
+        Route::delete('/{id}',                          [CategoryController::class, 'destroy']);
+    });
+    
+    Route::prefix('recommendations')->group(function () {
+        Route::get('/',                                 [RecommendationController::class, 'index']);
+        Route::post('/',                                [RecommendationController::class, 'store']);
+        Route::get('/{id}',                             [RecommendationController::class, 'show']);
+        Route::put('/{id}',                             [RecommendationController::class, 'update']);
+        Route::delete('/{id}',                          [RecommendationController::class, 'destroy']);
+        Route::post('/packages',                        [RecommendationController::class, 'getAllPackages']);
+        Route::post('/send-to-participants',            [RecommendationController::class, 'sendToParticipants']);
+    });
+    
     
     Route::prefix('questionnaires')->group(function () {
         Route::get('/',                             [QuestionnaireController::class, 'index']);
@@ -55,9 +72,6 @@ Route::middleware('auth:api')->group(function () {
     });
 
 });
-
-
-Route::get("/bitquery/getTemplateSettings",         [ApiController::class, 'getBitqueryTemplateSettings']);
 
 
 // UserController
@@ -129,26 +143,6 @@ Route::prefix('notifications')->group(function () {
     Route::put('/{id}/mark-as-read',                [NotificationController::class, 'markAsRead']);
     Route::put('/{id}/mark-all-as-read',            [NotificationController::class, 'markAllAsRead']);    
 });
-
-
-Route::prefix('categories')->group(function () {
-    Route::get('/',                                 [CategoryController::class, 'index']);
-    Route::post('/',                                [CategoryController::class, 'store']);
-    Route::get('/{id}',                             [CategoryController::class, 'show']);
-    Route::put('/{id}',                             [CategoryController::class, 'update']);
-    Route::delete('/{id}',                          [CategoryController::class, 'destroy']);
-});
-
-Route::prefix('recommendations')->group(function () {
-    Route::get('/',                                 [RecommendationController::class, 'index']);
-    Route::post('/',                                [RecommendationController::class, 'store']);
-    Route::get('/{id}',                             [RecommendationController::class, 'show']);
-    Route::put('/{id}',                             [RecommendationController::class, 'update']);
-    Route::delete('/{id}',                          [RecommendationController::class, 'destroy']);
-    Route::post('/packages',                        [RecommendationController::class, 'getAllPackages']);
-    Route::post('/send-to-participants',            [RecommendationController::class, 'sendToParticipants']);
-});
-
 
 Route::get('/participants/{id}/questionnaires',     [AppUserController::class, 'getAssignedQuestionnaires']);
 Route::post('/questionnaire-responses',             [AppUserController::class, 'submitResponses']); 

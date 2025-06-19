@@ -10,19 +10,17 @@ import { getParticipantsApi, sendNotificationApi } from '../../api/ParticipantAP
 import { useGlobalContext } from "../../contexts";
 import { toast_success, toast_error } from '../../utils/index.js';
 import { _ERROR_CODES } from '../../config';
-import { Menu } from 'primereact/menu';
-import { Badge } from 'primereact/badge'; // Import Badge component
+import { Badge } from 'primereact/badge';
 
 const SendToParticipants = () => {
     const [participants, setParticipants] = useState([]);
+    const [selectedParticipants, setSelectedParticipants] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [selectedParticipant, setSelectedParticipant] = useState(null);
-    const [notificationTitle, setNotificationTitle] = useState('Notification');
+    const [notificationTitle, setNotificationTitle] = useState('');
     const [notificationContent, setNotificationContent] = useState('');
     const [query, setQuery] = useState('');
     const { setLoading, confirmDialog } = useGlobalContext();
     const isMounted = useRef(true);
-    const menuRef = useRef(null);
 
     useEffect(() => {
         isMounted.current = true;
@@ -53,59 +51,46 @@ const SendToParticipants = () => {
             });
     };
 
-    const openSendModal = (participant) => {
-        setSelectedParticipant(participant);
-        setNotificationTitle('');
-        setNotificationContent('');
-        setShowModal(true);
-    };
-
     const handleSend = async () => {
         if (!notificationTitle || !notificationContent) {
             toast_error('Please fill in both title and content', _ERROR_CODES.VALIDATION_ERROR);
             return;
         }
 
-        // const isConfirm = await confirmDialog('Are you sure you want to send this notification?');
-        // if (!isConfirm) return;
+        const isConfirm = await confirmDialog('Are you sure you want to send this notification?');
+        if (!isConfirm) return;
 
         setLoading(true);
-        console.log(
-            selectedParticipant.id,
-            notificationTitle,
-            notificationContent
-        )
-        sendNotificationApi(
-            selectedParticipant.id,
-            notificationTitle,
-            notificationContent,
-        )
-            .then(() => {
-                if (isMounted.current) {
-                    toast_success('Notification sent successfully');
-                    setShowModal(false);
-                }
-            })
-            .catch(err => {
-                if (isMounted.current) {
-                    toast_error(err, _ERROR_CODES.NETWORK_ERROR);
-                }
-            })
-            .finally(() => {
-                if (isMounted.current) {
-                    setLoading(false);
-                }
-            });
+        try {
+            await Promise.all(
+                selectedParticipants.map(participant =>
+                    sendNotificationApi(participant.id, notificationTitle, notificationContent)
+                )
+            );
+            if (isMounted.current) {
+                toast_success('Notification sent successfully');
+                setShowModal(false);
+                setSelectedParticipants([]);
+            }
+        } catch (err) {
+            if (isMounted.current) {
+                toast_error(err, _ERROR_CODES.NETWORK_ERROR);
+            }
+        } finally {
+            if (isMounted.current) {
+                setLoading(false);
+            }
+        }
     };
 
     const statusBadge = (rowData) => {
         const severity = rowData.status === 'Active' ? 'success' :
-                         rowData.status === 'Disenrolled' ? 'danger' : 'warning';
+            rowData.status === 'Disenrolled' ? 'danger' : 'warning';
         return (
-            <Badge 
-                value={rowData.status} 
-                severity={severity} 
-                size="small" 
+            <Badge
+                value={rowData.status}
+                severity={severity}
+                size="small"
             />
         );
     };
@@ -117,6 +102,8 @@ const SendToParticipants = () => {
             <h3>Send To Participants</h3>
             <DataTable
                 value={participants}
+                selection={selectedParticipants}
+                onSelectionChange={(e) => setSelectedParticipants(e.value)}
                 responsiveLayout="scroll"
                 stripedRows
                 paginator
@@ -135,6 +122,14 @@ const SendToParticipants = () => {
                         <button onClick={fetchParticipants} className="btn btn-default">
                             <i className="fa fa-refresh" /> Reload
                         </button>
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => setShowModal(true)}
+                            disabled={selectedParticipants.length === 0}
+                        >
+                            <i className='fa fa-plane' /> Send
+                        </button>
+
                         <div className="ms-auto p-2">
                             <span className="p-input-icon-left">
                                 <i className="pi pi-search" />
@@ -149,33 +144,26 @@ const SendToParticipants = () => {
                 )}
             >
                 <Column
+                    selectionMode="multiple"
+                    headerStyle={{ width: '3em' }}
+                />
+                <Column
                     header="No"
                     body={noTemplate}
-                    style={{ width: '100px', textAlign: 'center' }} // Center alignment
+                    style={{ width: '100px', textAlign: 'center' }}
                 />
                 <Column
                     field="userID"
                     header="ParticipantID"
                     sortable
-                    style={{ textAlign: 'center' }} // Center alignment
+                    style={{ textAlign: 'center' }}
                 />
                 <Column
                     field="status"
                     header="Status"
                     body={statusBadge}
                     sortable
-                    style={{ textAlign: 'center' }} // Center alignment
-                />
-                <Column
-                    header="Actions"
-                    body={(rowData) => (
-                        <Button
-                            icon="pi pi-send"
-                            className="p-button-primary p-button-sm"
-                            onClick={() => openSendModal(rowData)}
-                        />
-                    )}
-                    style={{ textAlign: 'center', width: '150px' }} // Center alignment
+                    style={{ textAlign: 'center' }}
                 />
             </DataTable>
 
@@ -190,7 +178,7 @@ const SendToParticipants = () => {
                         <Button
                             label="Cancel"
                             onClick={() => setShowModal(false)}
-                            className="p-button-text"
+                            className="p-button-secondary"
                         />
                         <Button
                             label="Send"

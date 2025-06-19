@@ -119,6 +119,7 @@ class RecommendationController extends Controller
     {
         $participants = $request->participants;
         $payload = $request->payload;
+
         foreach ($participants as $participant) {
             $appuser = AppUser::where('id', $participant)->first();
             $fcmToken = $appuser->fcm_token ?? null;
@@ -126,20 +127,22 @@ class RecommendationController extends Controller
                 continue;
             }
             // // 1. Create send_recommendations entry
-            // $sendRecommendation = SendRecommendation::create([
-            //     'recommendation_id' => 0,
-            //     'researcher_id'     => 0,
-            //     'participant_id'    => $participant,
-            //     'send_time'         => now(),
-            //     'status'            => 'pending',
-            // ]);
+            foreach($payload as $item) {
+                $sendRecommendation = SendRecommendation::create([
+                    'recommendation_id' => $item["id"],
+                    'researcher_id'     => $item["researcher_id"],
+                    'participant_id'    => $participant,
+                    'send_time'         => now(),
+                    'status'            => 'pending',
+                ]);
+            }
 
             // Dispatch the job to send push notification
             SendPushNotification::dispatch(
                 $fcmToken,
                 'Recommendations',
                 'New recommendations arrived. Please click here to view them.',
-                0, // Assuming studyId is not needed here
+                0,
                 'recommendation',
                 $payload
             );
