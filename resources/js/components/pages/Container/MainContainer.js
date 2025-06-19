@@ -14,7 +14,7 @@ import { toast_success, toast_error } from '../../utils';
 const MainContainer = () => {
   const { isAdmin, _user } = useAuth();
   const { pathname: location } = useLocation();
-  const { loading, addNotification } = useGlobalContext();
+  const { loading, addNotification, triggerStudyManagementRefresh } = useGlobalContext();
 
   const _role_prefix = isAdmin ? '/admin' : '/user';
   const subNav = (isAdmin ? AdminNavbar : UserNavbar).find(item => location.startsWith(`${_role_prefix}/${item.prefix || item.link}`));
@@ -25,13 +25,24 @@ const MainContainer = () => {
       <NotificationsSocket
         userId={_user.id}
         onMessage={(res) => {
-          console.log("New notification received:", res);
-
           // Add notification to global context
           addNotification(res.message);
 
-          // Show toast notification
-          toast_success('New Notification: ' + (res?.message?.title || 'You got a message'));
+          // Truncate content if it's too long
+          const truncatedContent = res?.message?.content?.length > 50
+            ? `${res.message.content.substring(0, 50)}...`
+            : res.message.content;
+
+          // Show toast notification with title and truncated content
+          toast_success(`${res?.message?.title || 'Untitled'} - ${truncatedContent}`);
+
+          if (res?.message?.type === 'invitation-approved' || res?.message?.type === 'invitation-declined' ||
+            res?.message?.title === 'Invitation Approved' || res?.message?.title === 'Invitation Declined'
+          ) {
+            // Trigger refresh for StudyManagement component
+            triggerStudyManagementRefresh();
+          }
+
         }}
       />
 

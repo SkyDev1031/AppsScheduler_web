@@ -131,11 +131,20 @@ class StudyParticipantRequestController extends Controller
         }
     
         $invite->update(['study_status' => 'Approved']);
-        // event(new StudyInviteStatusUpdated($studyId, $appUserId, 'Approved'));
-
-        // Optionally notify the researcher
-        // Notification::send($invite->study->researcher, new InviteStatusNotification($invite));
+        
+        // Send a notification to the researcher
+         
+        // $notificationData = [
+        //     'id_appuser' => $appUserId,
+        //     'title' => 'Invitation Approved',
+        //     'content' => "The participant has approved the invitation for the study: {$invite->study->title}.",
+        //     'read_status' => 0,
+        //     'type' => 'invitation-approved'
+        // ];
     
+        // app('App\Http\Controllers\NotificationController')->store(new Request($notificationData));
+    
+
         return response()->json(['message' => 'Invitation approved']);
     }
     
@@ -158,7 +167,17 @@ class StudyParticipantRequestController extends Controller
         }
     
         $invite->update(['study_status' => 'Declined']);
-        event(new StudyInviteStatusUpdated($studyId, $appUserId, 'Declined'));
+        // Send a notification to the researcher
+         
+        // $notificationData = [
+        //     'id_appuser' => $appUserId,
+        //     'title' => 'Invitation Declined',
+        //     'content' => "The participant has declined the invitation for the study: {$invite->study->title}.",
+        //     'read_status' => 0,
+        //     'type' => 'invitation-declined'
+        // ];
+    
+        // app('App\Http\Controllers\NotificationController')->store(new Request($notificationData));
 
         return response()->json(['message' => 'Invitation declined']);
     }

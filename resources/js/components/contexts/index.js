@@ -19,12 +19,19 @@ export const GlobalContextProvider = ({ children }) => {
     const [click_count, setClickCount] = useState(0);
     const [buy_credits, setBuyCredits] = useState(0);
     const [sellerId, setSellerId] = useState({});
+    const [studyManagementRefresh, setStudyManagementRefresh] = useState(false);
 
     const [notifications, setNotifications] = useState([]);
     // Add a new notification
     const addNotification = (notification) => {
         setNotifications((prev) => [...prev, notification]);
     };
+
+    // Trigger refresh for StudyManagement component
+    const triggerStudyManagementRefresh = () => {
+        setStudyManagementRefresh((prev) => !prev); // Toggle the flag
+    };
+
     // Remove a specific notification
     const removeNotification = (notificationId) => {
         setNotifications((prev) => prev.filter((notification) => notification.id !== notificationId));
@@ -54,7 +61,8 @@ export const GlobalContextProvider = ({ children }) => {
                 user: _user || {}, isAdmin, _token,
                 loading, setLoading, refreshUser,
                 confirmDialog: customConfirmDialog,
-                notifications, addNotification, clearNotifications
+                notifications, addNotification, removeNotification, clearNotifications,
+                studyManagementRefresh, triggerStudyManagementRefresh
             }}>
             <ConfirmDialog />
             {children}

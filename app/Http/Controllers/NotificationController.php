@@ -12,35 +12,7 @@ use App\Models\Study;
 use Illuminate\Support\Facades\DB;
 
 class NotificationController extends Controller
-{
-    // public function index(Request $request)
-    // {
-    //     $userId = $request->user_id;
-    
-    //     if (!$userId) {
-    //         // If no user_id is provided, return all notifications
-    //         $notifications = Notification::orderBy('accept_time', 'desc')->get();
-    //     } else {
-    //         // Get studies managed by this user
-    //         $studyIds = Study::where('researcher_id', $userId)->pluck('id');
-    
-    //         // Get participant IDs from those studies
-    //         $participantIds = StudyParticipantRequest::whereIn('study_id', $studyIds)
-    //             ->pluck('participant_id');
-    
-    //         // Get notifications for those AppUsers
-    //         $notifications = Notification::whereIn('id_appuser', $participantIds)
-    //             ->orderBy('accept_time', 'desc')
-    //             ->get();
-    //     }
-    
-    //     return response()->json([
-    //         'data' => $notifications,
-    //         'message' => 'Notifications retrieved successfully.',
-    //         'success' => true,
-    //     ], 200);
-    // }
-    
+{    
     public function index(Request $request)
     {
         $userId = $request->user_id;
@@ -87,6 +59,7 @@ class NotificationController extends Controller
 
     public function store(Request $request, WebSocketNotifier $notifier)
     {
+        $type = $request->type ?? "default"; // Default to 'default' if not provided
         $validated = $request->validate([
             'id_appuser' => 'required|integer',
             'title' => 'required|string|max:255',
@@ -95,7 +68,6 @@ class NotificationController extends Controller
             'accept_time' => 'nullable|date',
             'read_time' => 'nullable|date',
         ]);
-    
         $validated['accept_time'] = now();
         // print_r($validated);
         try {
@@ -125,6 +97,7 @@ class NotificationController extends Controller
                 'read_status' => false,
                 'accept_time' => $validated['accept_time'],
                 'userID' => $userID,
+                'type' => $type // Include type in the message
             ];
     
             // Step 3: Send to each researcher via WebSocket

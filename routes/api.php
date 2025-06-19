@@ -74,7 +74,7 @@ Route::middleware('auth:api')->group(function () {
 });
 
 
-// UserController
+// UserController(ResearcherController)
 Route::post("/login",                               [UserController::class, 'login']);
 Route::post("/register",                            [UserController::class, 'register']);
 Route::post("/users",                               [UserController::class, 'getUsers']);
@@ -86,7 +86,7 @@ Route::post("/users/delete",                        [UserController::class, 'del
 
 
 
-// AppUserController
+// AppUserController(ParticipantController)
 Route::prefix('/appusers')->group(function () {
     Route::post("/registerAppUser",                 [AppUserController::class, 'registerAppUser']);
     Route::post("/",                                [AppUserController::class, 'getAppUsers']);
@@ -96,6 +96,12 @@ Route::prefix('/appusers')->group(function () {
     Route::post("/delete",                          [AppUserController::class, 'deleteAppUser']);
     Route::post("/isActive",                        [AppUserController::class, 'isAllowParticipant']);
     Route::post("/send",                            [AppUserController::class, 'sendNotification']); 
+});
+
+Route::prefix('invitations')->group(function () {
+    Route::get('/',                                 [StudyParticipantRequestController::class, 'myInvitations']);
+    Route::post('{id}/approve',                     [StudyParticipantRequestController::class, 'approve']);
+    Route::post('{id}/decline',                     [StudyParticipantRequestController::class, 'decline']);
 });
 
 // App Api Router
@@ -127,11 +133,7 @@ Route::prefix('/app')->group(function () {
     Route::post('/phoneUseInfoByPhonenumber',       [AppController::class, 'phoneUseInfoByPhonenumber']);
 });
 
-Route::prefix('invitations')->group(function () {
-    Route::get('/',                                 [StudyParticipantRequestController::class, 'myInvitations']);
-    Route::post('{id}/approve',                     [StudyParticipantRequestController::class, 'approve']);
-    Route::post('{id}/decline',                     [StudyParticipantRequestController::class, 'decline']);
-});
+
 
 Route::prefix('notifications')->group(function () {
     Route::get('/',                                 [NotificationController::class, 'index']);

@@ -39,7 +39,7 @@ export default function StudyManagement() {
   const [participantsModalOpen, setParticipantsModalOpen] = useState(false);
   const [selectedStudy, setSelectedStudy] = useState(null);
   const [studies, setStudies] = useState([]);
-  const { setLoading, confirmDialog, user } = useGlobalContext();
+  const { setLoading, confirmDialog, user, studyManagementRefresh } = useGlobalContext();
   const navigate = useNavigate();
 
   const fetchStudies = async () => {
@@ -62,9 +62,15 @@ export default function StudyManagement() {
     }
   };
 
+  // useEffect(() => {
+  //   fetchStudies();
+  // }, []);
+
   useEffect(() => {
+    // Refresh studies when study management refresh is triggered
+    console.log("StudyManagement refresh triggered");
     fetchStudies();
-  }, []);
+  }, [studyManagementRefresh]);
 
   const handleCreateStudyGroup = async (formData) => {
     try {
