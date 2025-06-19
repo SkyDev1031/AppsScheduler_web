@@ -278,7 +278,35 @@ class NotificationController extends Controller
             ], 200);
         }
     }
+    public function markAsUnread($id) 
+    {
+        $notification = Notification::find($id);
 
+        if (!$notification) {
+            return response()->json([
+                'message' => 'Notification not found.',
+                'success' => false,
+            ], 200);
+        }
+
+        try {
+            $notification->read_status = false;
+            $notification->read_time = null;
+            $notification->save();
+
+            return response()->json([
+                'data' => $notification,
+                'message' => 'Notification marked as unread successfully.',
+                'success' => true,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'There was a problem marking the notification as unread. Please try again.',
+                'success' => false,
+            ], 200);
+        }
+
+    }
     public function markAllAsRead()
     {
         try {

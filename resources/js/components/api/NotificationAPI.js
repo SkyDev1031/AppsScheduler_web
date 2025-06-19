@@ -15,3 +15,4 @@ export const deleteNotificationApi = (id) => _REQUEST(`notifications/${id}`, _RE
 export const clearNotificationApi = () => _REQUEST('notifications/clear', _REQ_METHOD.POST);
 export const markAsReadApi = (id) => _REQUEST(`notifications/${id}/mark-as-read`, _REQ_METHOD.PUT);
 export const markAllAsReadApi = () => _REQUEST('notifications/mark-all-as-read', _REQ_METHOD.PUT);
+export const markAsUnreadApi = (id) => _REQUEST(`notifications/${id}/mark-as-unread`, _REQ_METHOD.PUT);

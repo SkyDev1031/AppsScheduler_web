@@ -4,12 +4,15 @@ import { Avatar } from 'primereact/avatar';
 import { IMAGES } from "../assets";
 import { AdminProfileItem } from "../config";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faBell } from '@fortawesome/free-solid-svg-icons';
+import { Badge } from 'primereact/badge';
+import { useGlobalContext } from "../contexts";
 
 const HeaderNavbar = ({ isAdmin, user, holdings, onAction, logoutUser, _role_prefix, isSubItem, subNav, location }) => {
     const [isDropdownVisible, setDropdownVisible] = useState(false);
     const dropdownRef = useRef(null); // Reference for the dropdown area
     const avatarRef = useRef(null); // Reference for the avatar area
+    const { notifications } = useGlobalContext(); // Access notifications from context
 
     const toggleDropdown = () => {
         setDropdownVisible(!isDropdownVisible);
@@ -44,6 +47,16 @@ const HeaderNavbar = ({ isAdmin, user, holdings, onAction, logoutUser, _role_pre
                     <input type="text" placeholder="Type to search..." />
                 </div>
             </form>
+
+            {/* Notification Icon */}
+            <div className="header-navbar__notifications">
+                <Link to="/user/notifications" className="header-navbar__notification-button">
+                    <FontAwesomeIcon icon={faBell} size="lg" />
+                    {notifications.filter(notificaion => notificaion.read_status == 0).length > 0 && (
+                        <Badge value={notifications.filter(notificaion => notificaion.read_status == 0).length} severity="info" className="header-navbar__notification-badge" />
+                    )}
+                </Link>
+            </div>
 
             {/* User Profile Section */}
             <div className="header-navbar__user">

@@ -25,7 +25,10 @@ export const GlobalContextProvider = ({ children }) => {
     const addNotification = (notification) => {
         setNotifications((prev) => [...prev, notification]);
     };
-
+    // Remove a specific notification
+    const removeNotification = (notificationId) => {
+        setNotifications((prev) => prev.filter((notification) => notification.id !== notificationId));
+    };
     // Clear all notifications
     const clearNotifications = () => {
         setNotifications([]);
