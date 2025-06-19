@@ -2,8 +2,12 @@ import React from 'react';
 import { Link } from "react-router-dom";
 import { AdminNavbar, UserNavbar } from "../config";
 import { logoutUser } from "../utils";
+import { useGlobalContext } from "../contexts"; // Import global context
+import { Badge } from 'primereact/badge'; // Import Badge component
 
 const SideNavbar = ({ isAdmin, user, location, _role_prefix, toggleSidebar }) => {
+    const { notifications } = useGlobalContext(); // Access notifications from global context
+
     return (
         <div className="sidebar-wrapper">
             {/* Sidebar Logo */}
@@ -27,6 +31,10 @@ const SideNavbar = ({ isAdmin, user, location, _role_prefix, toggleSidebar }) =>
                             <Link to={`${_role_prefix}/${item.prefix || item.link}`}>
                                 <i className={item.icon} /> {/* Use Font Awesome icon */}
                                 <span>{item.label}</span>
+                                {/* Show badge for NotificationNav */}
+                                {item.prefix === "notifications" && notifications.filter(notification => notification.read_status == 0).length > 0 && (
+                                    <Badge value={notifications.filter(notification => notification.read_status == 0).length} severity="info" className="notification-badge" />
+                                )}
                             </Link>
                         </li>
                     );

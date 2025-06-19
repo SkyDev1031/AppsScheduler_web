@@ -9,36 +9,43 @@ export const NavKeys = {
 export const UserNavbar = [
     {
         label: "Dashboard",
+        prefix: 'dashboard',
         link: 'dashboard',
         icon: 'fa-solid fa-chart-line', // Font Awesome icon for Dashboard
     },
     {
         label: "Study Group",
+        prefix: 'study',
         link: 'study',
         icon: 'fa-solid fa-users', // Font Awesome icon for Study Group
     },
     {
         label: "Categories",
+        prefix: 'categories',
         link: 'categories',
         icon: 'fa-solid fa-tags',
     },
     {
         label: "Notifications",
+        prefix: 'notifications',
         link: 'notifications',
         icon: 'fa-solid fa-bell',
     },
     {
         label: "Send to Participants",
+        prefix: 'sendtoparticipants',
         link: 'sendtoparticipants',
         icon: 'fa-solid fa-paper-plane',
     },
     {
         label: "Recommendations",
+        prefix: 'recommendations',
         link: 'recommendations',
         icon: 'fa-solid fa-lightbulb', // Lightbulb represents ideas or suggestions
     },
     {
         label: "Questionnaires",
+        prefix: 'questionnaires',
         link: 'questionnaires',
         icon: 'fa-solid fa-list-check', // Checklist icon represents forms or questionnaires
     },
