@@ -15,6 +15,7 @@ import { useGlobalContext } from '../../contexts';
 import { toast_success, toast_error } from '../../utils';
 import { _ERROR_CODES } from '../../config';
 import useAuth from '../../hooks/useAuth';
+import { Tag } from 'primereact/tag';
 
 const CategoryManagement = () => {
     const [categories, setCategories] = useState([]);
@@ -22,7 +23,7 @@ const CategoryManagement = () => {
     const [query, setQuery] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
-    const [form, setForm] = useState({ title: '', content: '', researcher_id: _user.id });
+    const [form, setForm] = useState({ title: '', content: '', researcher_id: _user.id, role: 2 });
 
     const { setLoading, confirmDialog } = useGlobalContext();
     const isMounted = useRef(true);
@@ -69,7 +70,6 @@ const CategoryManagement = () => {
 
     const handleSave = async () => {
         if (!form.title.trim()) return toast_error('Title is required.');
-        if (!form.content.trim()) return toast_error('Content is required.');
 
         setLoading(true);
         try {
@@ -90,39 +90,82 @@ const CategoryManagement = () => {
     };
 
     const openCreateModal = () => {
-        setForm({ title: '', content: '', researcher_id: _user.id });
+        setForm({ title: '', content: '', researcher_id: _user.id, role: 2 });
         setIsEditMode(false);
         setModalVisible(true);
     };
 
     const openEditModal = (category) => {
-        setForm({ title: category.title, content: category.content, id: category.id });
+        setForm({ 
+            title: category.title, 
+            content: category.content, 
+            id: category.id,
+            role: category.role 
+        });
         setIsEditMode(true);
         setModalVisible(true);
     };
 
-    const actionButtons = (rowData) => (
-        <div className="flex gap-2">
-            <Button
-                icon="pi pi-pencil"
-                className="p-button-sm"
-                tooltip="Edit category"
-                tooltipOptions={{ position: 'top' }}
-                onClick={() => openEditModal(rowData)}
-                style={{ marginRight: '5px' }}
+    const getRoleName = (role) => {
+        switch(role) {
+            case 0: return 'System Default';
+            case 1: return 'Default';
+            case 2: return 'Custom';
+            default: return 'Unknown';
+        }
+    };
+
+    const getRoleSeverity = (role) => {
+        switch(role) {
+            case 0: return 'danger';    // Red for System Default
+            case 1: return 'warning';  // Orange for Default
+            case 2: return 'success'; // Green for Custom
+            default: return 'info';     // Blue for Unknown
+        }
+    };
+
+    const roleBodyTemplate = (rowData) => {
+        return (
+            <Tag 
+                value={getRoleName(rowData.role)}
+                severity={getRoleSeverity(rowData.role)}
+                style={{ 
+                    fontWeight: 'bold',
+                    minWidth: '100px',
+                    textAlign: 'center'
+                }}
             />
-            <Button
-                icon="pi pi-trash"
-                className="p-button-danger p-button-sm"
-                tooltip="Delete category"
-                tooltipOptions={{ position: 'top' }}
-                onClick={() => handleDelete(rowData)}
-            />
-        </div>
-    );
+        );
+    };
+
+    const actionButtons = (rowData) => {
+        const isDefault = rowData.role === 0 || rowData.role === 1;
+        
+        return (
+            <div className="flex gap-2">
+                <Button
+                    icon="pi pi-pencil"
+                    className="p-button-sm"
+                    tooltip={isDefault ? "Default categories cannot be edited" : "Edit category"}
+                    tooltipOptions={{ position: 'top' }}
+                    onClick={() => !isDefault && openEditModal(rowData)}
+                    disabled={isDefault}
+                    style={{ marginRight: '5px' }}
+                />
+                <Button
+                    icon="pi pi-trash"
+                    className="p-button-danger p-button-sm"
+                    tooltip={isDefault ? "Default categories cannot be deleted" : "Delete category"}
+                    tooltipOptions={{ position: 'top' }}
+                    onClick={() => !isDefault && handleDelete(rowData)}
+                    disabled={isDefault}
+                />
+            </div>
+        );
+    };
 
     return (
-        <div className="p-4">
+        <div className="p-4 container">
             <h3 className="mb-4">Category Management</h3>
 
             <DataTable
@@ -167,7 +210,12 @@ const CategoryManagement = () => {
                         </div>
                     )}
                 />
-                {/* <Column field="researcher_id" header="Researcher ID" sortable /> */}
+                <Column 
+                    field="role" 
+                    header="Type" 
+                    sortable 
+                    body={roleBodyTemplate}
+                />
                 <Column header="Actions" body={actionButtons} style={{ width: '140px' }} />
             </DataTable>
 
@@ -193,6 +241,21 @@ const CategoryManagement = () => {
                     <label htmlFor="content">Description</label>
                     <InputText id="content" value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} />
                 </div>
+                {isEditMode && (
+                    <div className="field mt-3">
+                        <label htmlFor="role">Type</label>
+                        <Tag 
+                            value={getRoleName(form.role)}
+                            severity={getRoleSeverity(form.role)}
+                            style={{ 
+                                fontWeight: 'bold',
+                                minWidth: '100px',
+                                textAlign: 'center',
+                                marginLeft: '10px'
+                            }}
+                        />
+                    </div>
+                )}
             </Dialog>
         </div>
     );

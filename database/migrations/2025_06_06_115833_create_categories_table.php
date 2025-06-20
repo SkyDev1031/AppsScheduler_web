@@ -13,6 +13,7 @@ class CreateCategoriesTable extends Migration
             $table->foreignId('researcher_id')->constrained('users')->onDelete('cascade'); // assuming researchers are users
             $table->string('title');
             $table->text('content')->nullable();
+            $table->integer('role')->default(0);
             $table->timestamps();
         });
     }

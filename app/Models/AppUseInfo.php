@@ -14,6 +14,7 @@ class AppUseInfo extends Model
         'userID',
         'app_name',
         'app_package_name',
+        'app_category',
         'app_start_time',
         'app_end_time',
         'app_duration',

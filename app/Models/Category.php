@@ -13,6 +13,7 @@ class Category extends Model
         'researcher_id',
         'title',
         'content',
+        'role'
     ];
 
     public function researcher()
