@@ -28,6 +28,7 @@ const UserNav = [
     { path: '/notifications', Component: lazy(() => import("./pages/Users/NotificationManagement")) },
     { path: '/sendtoparticipants', Component: lazy(() => import("./pages/Users/SendToParticipants")) },
     { path: '/recommendations', Component: lazy(() => import("./pages/Users/Recommendation/RecommendationManagement")) },
+    { path: '/rules', Component: lazy(() => import("./pages/Users/Rules/DynamicRuleManagement")) },
     { path: '/questionnaires', Component: lazy(() => import("./pages/Users/Questionnaire/QuestionnaireManagement")) },
 ]
 function App() {

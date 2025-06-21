@@ -11,14 +11,32 @@ export const UserNavbar = [
         label: "Dashboard",
         prefix: 'dashboard',
         link: 'dashboard',
-        icon: 'fa-solid fa-chart-line', // Font Awesome icon for Dashboard
+        icon: 'fa-solid fa-chart-line',
     },
     {
         label: "Study Group",
         prefix: 'study',
         link: 'study',
-        icon: 'fa-solid fa-users', // Font Awesome icon for Study Group
+        icon: 'fa-solid fa-users',
     },
+    {
+        label: "Recommendations",
+        prefix: 'recommendations',
+        link: 'recommendations',
+        icon: 'fa-solid fa-lightbulb',
+    },
+    {
+        label: "Dynamic Rules",
+        prefix: 'rules',
+        link: 'rules',
+        icon: 'fa-solid fa-sliders',
+    },
+    {
+        label: "Questionnaires",
+        prefix: 'questionnaires',
+        link: 'questionnaires',
+        icon: 'fa-solid fa-list-check',    
+    },    
     {
         label: "Categories",
         prefix: 'categories',
@@ -37,20 +55,6 @@ export const UserNavbar = [
         link: 'sendtoparticipants',
         icon: 'fa-solid fa-paper-plane',
     },
-    {
-        label: "Recommendations",
-        prefix: 'recommendations',
-        link: 'recommendations',
-        icon: 'fa-solid fa-lightbulb', // Lightbulb represents ideas or suggestions
-    },
-    {
-        label: "Questionnaires",
-        prefix: 'questionnaires',
-        link: 'questionnaires',
-        icon: 'fa-solid fa-list-check', // Checklist icon represents forms or questionnaires
-    },
-    
-    
     // {
     //     label: "Packages",
     //     prefix: 'packages',
