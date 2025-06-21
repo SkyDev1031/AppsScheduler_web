@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\QuestionnaireController;
+use App\Http\Controllers\RuleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +70,13 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/{id}',                      [QuestionnaireController::class, 'destroy']);
         Route::get('/{id}/responses',               [QuestionnaireController::class, 'getResponses']);
         Route::post('/summary',                     [QuestionnaireController::class, 'summary']);
+    });
+
+    Route::prefix('rules')->group(function () {
+        Route::post('/create',                      [RuleController::class, 'create']); // Create new rule
+        Route::post('/assign',                      [RuleController::class, 'assign']); // Assign rule to participant
+        Route::get('/participant/{participantId}',  [RuleController::class, 'getRulesForParticipant']); // App fetches
+        Route::get('/researcher/{researcherId}',    [RuleController::class, 'getRulesForResearcher']); // Web fetches
     });
 
 });

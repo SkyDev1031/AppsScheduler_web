@@ -38,4 +38,14 @@ class AppUser extends Model
     {
         return $this->belongsTo(AppUser::class, 'participant_id');
     }
+
+    public function assignedRules()
+    {
+        return $this->belongsToMany(DynamicRule::class, 'rule_assignments', 'participant_id', 'rule_id');
+    }
+
+    public function ruleAssignments()
+    {
+        return $this->hasMany(RuleAssignment::class, 'participant_id');
+    }
 }

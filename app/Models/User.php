@@ -71,5 +71,13 @@ class User extends Authenticatable
 		return $this->hasMany(Study::class, 'researcher_id');
 	}
 
-	
+	public function createdRuleAssignments()
+    {
+        return $this->hasMany(RuleAssignment::class, 'researcher_id');
+    }
+
+    public function assignedRules()
+    {
+        return $this->belongsToMany(DynamicRule::class, 'rule_assignments', 'researcher_id', 'rule_id');
+    }
 }
