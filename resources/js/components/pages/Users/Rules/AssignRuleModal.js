@@ -6,15 +6,16 @@ import { getStudiesWithParticipants } from '../../../api/StudyAPI';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const AssignRuleModal = ({
-    participantsModalOpen,
-    setParticipantsModalOpen,
-    handleSendRecommendation
+    visible,
+    setVisible,
+    handleAssign
 }) => {
     const [studies, setStudies] = useState([]);
     const [checked, setChecked] = useState([]);
     const [expanded, setExpanded] = useState([]);
 
     useEffect(() => {
+        console.log("Hi Assign Dialog")
         const fetchStudiesWithParticipants = async () => {
             try {
                 const response = await getStudiesWithParticipants();
@@ -43,17 +44,17 @@ const AssignRuleModal = ({
             }
         };
 
-        if (participantsModalOpen) {
+        if (visible) {
             fetchStudiesWithParticipants();
         }
-    }, [participantsModalOpen]);
+    }, [visible]);
 
     return (
         <Dialog
-            visible={participantsModalOpen}
-            onHide={() => setParticipantsModalOpen(false)}
+            visible={visible}
+            onHide={() => setVisible(false)}
             style={{ width: '50vw', minHeight: '400px' }}
-            header="Send Recommendation"
+            header="Send Rule"
             modal
             className="study-participants-modal"
             footer={
@@ -63,16 +64,16 @@ const AssignRuleModal = ({
                 }}>
                     <button
                         className="btn btn-secondary me-2"
-                        onClick={() => setParticipantsModalOpen(false)}
+                        onClick={() => setVisible(false)}
                     >
                         Cancel
                     </button>
                     <button
                         className="btn btn-primary"
-                        onClick={() => handleSendRecommendation(checked)}
+                        onClick={() => handleAssign(checked)}
                         disabled={checked.length === 0}
                     >
-                        Send Recommendation
+                        Send Rule
                     </button>
                 </div>
             }

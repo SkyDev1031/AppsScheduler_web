@@ -22,4 +22,4 @@ export const assignRuleToParticipantApi = ({ rule_id, researcher_id, participant
     _REQUEST('rules/assign', _REQ_METHOD.POST, { rule_id, researcher_id, participant_id });
 
 export const sendRulesToParticipantsApi = (participants, rules) =>
-    _REQUEST('rules/send-to-participants', _REQ_METHOD.POST, { participants, rules });
+    _REQUEST('rules/send-to-participants', _REQ_METHOD.POST, { participants, payload: rules });

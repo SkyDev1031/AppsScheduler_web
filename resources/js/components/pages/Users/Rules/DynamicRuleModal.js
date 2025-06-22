@@ -127,12 +127,12 @@ const DynamicRuleModal = ({
     const dialogFooter = (
         <div className="flex justify-content-end gap-2">
             <Button 
-                icon="pi pi-times" 
+                label='Cancel'
                 className="p-button-danger" 
                 onClick={() => setDialogVisible(false)} 
             />
             <Button 
-                icon="pi pi-check" 
+                label={editing ? "Update" : "Save"}
                 className="p-button-primary" 
                 onClick={handleSave} 
             />
@@ -364,18 +364,6 @@ const DynamicRuleModal = ({
                     </div>
                 </div>
 
-                {/* Notes */}
-                <div className="field col-12">
-                    <label htmlFor="notes">Notes</label>
-                    <InputTextarea
-                        id="notes"
-                        rows={3}
-                        value={form.notes}
-                        onChange={(e) => updateField('notes', e.target.value)}
-                        placeholder="Optional notes for this rule"
-                        className="w-full"
-                    />
-                </div>
             </div>
         </Dialog>
     );

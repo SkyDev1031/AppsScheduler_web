@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\RuleAssignment;
 use Illuminate\Support\Facades\Auth;
 use App\Models\DynamicRule;
+use App\Models\AppUser;
+use App\Jobs\SendPushNotification;
 
 class RuleController extends Controller
 {
@@ -31,8 +33,7 @@ class RuleController extends Controller
             'condition' => 'required|array',
             'action' => 'required|array',
             'evaluation_window' => 'required|string',
-            'effective_days' => 'required|array',
-            'notes' => 'required|string'
+            'effective_days' => 'required|array'
         ]);
     
         $rule = DynamicRule::create(array_merge($validated, [
@@ -44,6 +45,34 @@ class RuleController extends Controller
             'rule' => $rule
         ]);
     }
+
+    public function update(Request $request, $id)
+    {
+        $rule = DynamicRule::findOrFail($id);
+
+        // Optional: Ensure only the owner can update
+        if ($rule->researcher_id !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'track_targets' => 'required|array',
+            'restrict_targets' => 'required|array',
+            'condition' => 'required|array',
+            'action' => 'required|array',
+            'evaluation_window' => 'required|string',
+            'effective_days' => 'required|array'
+        ]);
+
+        $rule->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'rule' => $rule
+        ]);
+    }
+
     public function assign(Request $request)
     {
         $validated = $request->validate([
@@ -80,5 +109,35 @@ class RuleController extends Controller
             'success' => true,
             'rules' => $rules
         ]);
+    }
+
+    public function sendRulesToParticipants(Request $request)
+    {
+        $participants = $request->participants;
+        $payload = $request->payload;
+
+        foreach ($participants as $participant) {
+            $appuser = AppUser::where('id', $participant)->first();
+            $fcmToken = $appuser->fcm_token ?? null;
+            if (!$appuser || !$fcmToken) {
+                continue;
+            }
+
+            // Dispatch the job to send push notification
+            SendPushNotification::dispatch(
+                $fcmToken,
+                'Dynamic Rules',
+                'New Dynamic Rules arrived. Please click here to view them.',
+                0,
+                'rule',
+                $payload
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notifications sent to participants.'
+        ]);
+
     }
 }

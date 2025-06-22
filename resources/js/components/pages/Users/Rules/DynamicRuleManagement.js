@@ -15,7 +15,8 @@ import {
     createRuleApi,
     updateRuleApi,
     deleteRuleApi,
-    assignRuleToParticipantApi
+    assignRuleToParticipantApi,
+    sendRulesToParticipantsApi
 } from '../../../api/DynamicRuleAPI';
 
 const DynamicRuleManagement = () => {
@@ -182,17 +183,7 @@ const DynamicRuleManagement = () => {
     const handleAssign = async (participants) => {
         setLoading(true);
         try {
-            await Promise.all(
-                selectedRules.map(rule =>
-                    participants.map(participant =>
-                        assignRuleToParticipantApi({
-                            rule_id: rule.id,
-                            researcher_id: _user.id,
-                            participant_id: participant.id
-                        })
-                    )
-                ).flat()
-            );
+            const res = await sendRulesToParticipantsApi(participants, selectedRules);
             toast_success('Rules assigned successfully');
             setAssignModalVisible(false);
         } catch (err) {
