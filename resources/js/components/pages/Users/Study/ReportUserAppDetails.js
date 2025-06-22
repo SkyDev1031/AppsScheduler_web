@@ -15,7 +15,7 @@ import { toast_error, toast_success } from '../../../utils/index.js';
 import SimpleDatePicker from '../../../components/SimpleDatePicker.js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { encryptParam, decryptParam } from '../../../utils/cryptoUtils.js'
-// const location = useLocation();
+import { Dropdown } from 'primereact/dropdown';
 
 const _ACT_TYPE = {
     DEFAULT: -1,
@@ -61,6 +61,7 @@ const preprocessAppUsageInfos = (data) => {
             app_end_date: endDate, // EndDate
             app_end_time: endTime, // EndTime
             app_name: item.app_name, // AppName
+            app_category: item.app_category, // AppCategory
             app_duration: duration.trim(), // Duration
             app_scheduled_status: item.app_scheduled_status, // ScheduledStatus
             saved_time: item.saved_time // SavedTime
@@ -73,19 +74,30 @@ const ReportAppDetails = () => {
     const { encryptedPhoneNumber } = useParams()
     const [phonenumber, setPhonenumber] = useState('')
     const [appUsageInfos, setAppUsageInfos] = useState([])
+    const [originalAppUsageInfos, setOriginalAppUsageInfos] = useState([]) // Store original data for filtering
     const [query, setQuery] = useState('')
     const { setLoading, confirmDialog } = useGlobalContext();
     const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-    const isFirstRender = useRef(true); // Create a ref to track the first render
-    // const [studyId, setStudyId] = useState(location.state?.studyId || '');
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [categories, setCategories] = useState([]);
+    const isFirstRender = useRef(true);
+
     const getAppUsageInfos = () => {    
         setLoading(true);
         getAppUsageDurationApi(phonenumber, "", "")
             .then(res => {
-                const processedData = preprocessAppUsageInfos(res.data); // Preprocess data
+                const processedData = preprocessAppUsageInfos(res.data);
                 setAppUsageInfos(processedData);
+                setOriginalAppUsageInfos(processedData);
+                
+                // Extract unique categories
+                const uniqueCategories = [...new Set(processedData.map(item => item.app_category))];
+                setCategories(uniqueCategories.map(category => ({
+                    label: category,
+                    value: category
+                })));
             })
             .catch(err => {
                 toast_error(err, _ERROR_CODES.NETWORK_ERROR);
@@ -97,8 +109,16 @@ const ReportAppDetails = () => {
         setLoading(true);
         getAppUsageDurationApi(phonenumber, startDate, endDate)
             .then(res => {
-                const processedData = preprocessAppUsageInfos(res.data); // Preprocess data
+                const processedData = preprocessAppUsageInfos(res.data);
                 setAppUsageInfos(processedData);
+                setOriginalAppUsageInfos(processedData);
+                
+                // Extract unique categories
+                const uniqueCategories = [...new Set(processedData.map(item => item.app_category))];
+                setCategories(uniqueCategories.map(category => ({
+                    label: category,
+                    value: category
+                })));
             })
             .catch(err => {
                 toast_error(err, _ERROR_CODES.NETWORK_ERROR);
@@ -108,8 +128,8 @@ const ReportAppDetails = () => {
 
     useEffect(() => {
         if (isFirstRender.current) {
-            isFirstRender.current = false; // Update the flag after the first render
-            return; // Exit the effect without executing further logic
+            isFirstRender.current = false;
+            return;
         }
         console.log("detail Get", phonenumber)
         getAppUsageInfos();
@@ -119,13 +139,20 @@ const ReportAppDetails = () => {
         setPhonenumber(decryptParam(encryptedPhoneNumber))
     }, [encryptedPhoneNumber])
 
+    useEffect(() => {
+        // Apply category filter when selectedCategory changes
+        if (selectedCategory) {
+            const filteredData = originalAppUsageInfos.filter(item => 
+                item.app_category === selectedCategory
+            );
+            // console.log("selectedCategory", selectedCategory, filteredData, originalAppUsageInfos)
+            setAppUsageInfos(filteredData);
+        } else {
+            setAppUsageInfos(originalAppUsageInfos);
+        }
+    }, [selectedCategory, originalAppUsageInfos]);
+
     const handleDownload = () => {
-        // getAppUsageDurationApi(phonenumber, startDate, endDate)
-        //     .then(res => {
-        //         const cleanedData = res.data.map(({ phonenumber, ...rest }) => rest);
-        //         downloadCSV(cleanedData)
-        //     })
-        //     .catch(err => console.log(err))
         const cleanedData = appUsageInfos.map(({ phonenumber, ...rest }) => rest);
         downloadCSV(cleanedData)
     }
@@ -133,12 +160,20 @@ const ReportAppDetails = () => {
     const goFreq = () => {
         navigate(`/user/reportApp/details2/${encryptParam(phonenumber)}`);
     }
+    
     const onBack = () => {
-        navigate(-1); // Just go back to previous page
+        navigate(-1);
     };
+    
     const viewByDate = () => {
         getAppUsageByDateInfos()
     }
+    
+    const clearFilters = () => {
+        setSelectedCategory(null);
+        setQuery('');
+    }
+
     return (
         <>
             <h3>Show Report App Usage Duration Details</h3>
@@ -154,6 +189,15 @@ const ReportAppDetails = () => {
                             <button onClick={getAppUsageInfos} className="btn btn-default"><i className="fa fa-refresh" /> Reload</button>
                             <button onClick={handleDownload} className="btn btn-default"><i className="fas fa-download" /> CSV</button>
                             <button onClick={goFreq} className="btn btn-success"><i className="fas fa-binoculars"></i> View Frequency</button>
+                            <Dropdown 
+                                value={selectedCategory}
+                                options={categories}
+                                onChange={(e) => setSelectedCategory(e.value)}
+                                optionLabel="label"
+                                placeholder="Select Category"
+                                style={{ width: '250px', marginLeft: '10px' }}
+                                showClear
+                            />
                         </div>
                         <div className="p-2">
                             <span className="p-input-icon-left">
@@ -178,6 +222,7 @@ const ReportAppDetails = () => {
                 <Column key={'app_end_date'} header={'End Date'} field={'app_end_date'} sortable className="text-right" />
                 <Column key={'app_end_time'} header={'End Time'} field={'app_end_time'} sortable className="text-right" />
                 <Column key={'app_name'} header={'AppName'} field={'app_name'} sortable className="text-right" />
+                <Column key={'app_category'} header={'Category'} field={'app_category'} sortable className="text-right" />
                 <Column key={'app_duration'} header={'Duration'} field={'app_duration'} sortable className="text-right" />
                 <Column key={'app_scheduled_status'} header={'ScheduledStatus'} field={'app_scheduled_status'} sortable className="text-right" />
                 <Column key={'saved_time'} header={'SavedTime'} field={'saved_time'} sortable className="text-right" />

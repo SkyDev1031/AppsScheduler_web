@@ -187,6 +187,7 @@ class AppController extends Controller
                 phonenumber,
                 userID,
                 app_name,
+                app_category,
                 app_start_time,
                 app_end_time,
                 MIN(saved_time) AS from_period,
@@ -206,120 +207,6 @@ class AppController extends Controller
         return response()->json(['data' => $appUseInfos]);
     }
 
-
-    // public function appUseInfoDuration(Request $request)
-    // {
-    //     // Extract request parameters
-    //     $phonenumber = $request->input('phonenumber');
-    //     $startDate = $request->input('startDate');
-    //     $endDate = $request->input('endDate');
-    //     $studyId = $request->input("studyId");
-
-    //     // Base query using raw SQL with updated column names
-    //     $sql = "
-    //         SELECT
-    //             phonenumber,
-    //             userID,
-    //             app_name,
-    //             app_start_time,
-    //             app_end_time,
-    //             app_duration,
-    //             CASE
-    //                 WHEN app_scheduled_flag = 1 THEN 'Scheduled time'
-    //                 WHEN app_scheduled_flag = -1 THEN 'Unscheduled time'
-    //                 WHEN app_scheduled_flag = 0 THEN 'Not scheduled App'
-    //                 ELSE 'Unknown Flag'
-    //             END AS app_scheduled_status,
-    //             saved_time
-    //         FROM
-    //             app_use_infos
-    //     ";
-
-    //     // Add conditions dynamically
-    //     $bindings = [];
-    //     if (!empty($phonenumber)) {
-    //         $sql .= " WHERE phonenumber = ?";
-    //         $bindings[] = $phonenumber;
-    //     }
-
-    //     if (!empty($phonenumber) && !empty($startDate) && !empty($endDate)) {
-    //         $sql .= " AND saved_time >= ? AND saved_time < DATE_ADD(?, INTERVAL 1 DAY)";
-    //         $bindings[] = $startDate;
-    //         $bindings[] = $endDate;
-    //     }
-
-    //     // Add ordering
-    //     $sql .= " ORDER BY saved_time ASC, app_name ASC";
-
-    //     // Execute the query with parameter binding to prevent SQL injection
-    //     $appUseInfos = DB::select($sql, $bindings);
-
-    //     // Return the response
-    //     return response()->json([
-    //         'data' => $appUseInfos,
-    //         'phonenumber' => $phonenumber,
-    //     ]);
-    // }
-
-
-    // public function appUseInfoFreq(Request $request)
-    // {
-    //     // Extract request parameters
-    //     $phonenumber = $request->input('phonenumber');
-    //     $startDate = $request->input('startDate');
-    //     $endDate = $request->input('endDate');
-
-    //     // Base query using raw SQL with updated column names
-    //     $sql = "
-    //         SELECT
-    //             id,
-    //             phonenumber,
-    //             userID,
-    //             app_name,
-    //             COUNT(app_name) AS frequency_app_openings,
-    //             CASE
-    //                 WHEN app_scheduled_flag = 1 THEN 'Scheduled time'
-    //                 WHEN app_scheduled_flag = -1 THEN 'Unscheduled time'
-    //                 WHEN app_scheduled_flag = 0 THEN 'Not scheduled App'
-    //                 ELSE 'Unknown Flag'
-    //             END as scheduled_status,
-    //             DATE(saved_time) as savedTime
-    //         FROM
-    //             app_use_infos
-    //         WHERE
-    //             phonenumber = ?
-    //     ";
-
-    //     // Add conditions dynamically
-    //     $bindings = [$phonenumber];
-
-    //     if (!empty($startDate) && !empty($endDate)) {
-    //         $sql .= " AND saved_time >= ? AND saved_time < DATE_ADD(?, INTERVAL 1 DAY)";
-    //         $bindings[] = $startDate;
-    //         $bindings[] = $endDate;
-    //     }
-
-    //     // Group by and order by
-    //     $sql .= "
-    //         GROUP BY
-    //             app_name, app_scheduled_flag, DATE(saved_time)
-    //         ORDER BY
-    //             savedTime ASC,
-    //             app_name ASC,
-    //             frequency_app_openings DESC
-    //     ";
-
-    //     // Execute the query with parameter binding to prevent SQL injection
-    //     $appUseInfos = DB::select($sql, $bindings);
-
-    //     // Return the response
-    //     return response()->json([
-    //         'data' => $appUseInfos,
-    //         'phonenumber' => $phonenumber,
-    //     ]);
-    // }
-
-
     public function appUseInfoDuration(Request $request)
     {
         $phonenumber = $request->input('phonenumber');
@@ -335,6 +222,7 @@ class AppController extends Controller
                 a.phonenumber,
                 a.userID,
                 a.app_name,
+                a.app_category,
                 a.app_start_time,
                 a.app_end_time,
                 a.app_duration,
