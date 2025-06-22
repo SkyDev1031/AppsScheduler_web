@@ -18,8 +18,5 @@ export const updateRecommendationApi = (id, data) =>
 export const deleteRecommendationApi = (id) =>
     _REQUEST(`recommendations/${id}`, _REQ_METHOD.DELETE);
 
-export const getAppPackagesApi = () => 
-    _REQUEST('recommendations/packages', _REQ_METHOD.POST);
-
 export const sendToParticipantsApi = (participants, payload) => 
     _REQUEST('recommendations/send-to-participants', _REQ_METHOD.POST, {participants, payload});

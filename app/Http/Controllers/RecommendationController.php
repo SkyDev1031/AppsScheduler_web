@@ -88,32 +88,6 @@ class RecommendationController extends Controller
         return response()->json(['message' => 'Deleted']);
     }
 
-    public function getAllPackages()
-    {
-        try {
-            $packages = DB::table('app_use_infos')
-                ->select(
-                    'app_package_name as value', 
-                    'app_name as label'
-                )
-                ->distinct()
-                ->orderBy('app_name')
-                ->get();
-                
-            return response()->json([
-                'success' => true,
-                'packages' => $packages
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch packages',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
 
     public function sendToParticipants(Request $request)
     {

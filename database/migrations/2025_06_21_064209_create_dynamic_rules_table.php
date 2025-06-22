@@ -15,6 +15,7 @@ class CreateDynamicRulesTable extends Migration
     {
         Schema::create('dynamic_rules', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('researcher_id')->constrained('users')->onDelete('cascade');
             $table->string('name');
             $table->json('track_targets');     // { apps: [], categories: [] }
             $table->json('restrict_targets');  // { apps: [], categories: [] }
@@ -22,6 +23,7 @@ class CreateDynamicRulesTable extends Migration
             $table->json('action');            // { type, start_time?, end_time?, limit_minutes? }
             $table->string('evaluation_window')->default('daily'); // e.g., daily, weekly
             $table->json('effective_days');    // [ "Monday", "Tuesday", ... ]
+            $table->string('notes')->default('');
             $table->timestamps();
         });
     }

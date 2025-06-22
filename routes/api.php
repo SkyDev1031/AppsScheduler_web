@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AppController;
+use App\Http\Controllers\AppPackageController;
 use App\Http\Controllers\AppUserController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StudyController;
@@ -42,6 +43,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/cancel',                      [StudyParticipantRequestController::class, 'cancel']);   // researcher
     });    
 
+    Route::post('/packages',                            [AppPackageController::class, 'getAllPackages']);
     Route::prefix('categories')->group(function () {
         Route::get('/',                                 [CategoryController::class, 'index']);
         Route::post('/',                                [CategoryController::class, 'store']);
@@ -56,10 +58,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/{id}',                             [RecommendationController::class, 'show']);
         Route::put('/{id}',                             [RecommendationController::class, 'update']);
         Route::delete('/{id}',                          [RecommendationController::class, 'destroy']);
-        Route::post('/packages',                        [RecommendationController::class, 'getAllPackages']);
         Route::post('/send-to-participants',            [RecommendationController::class, 'sendToParticipants']);
-    });
-    
+    });    
     
     Route::prefix('questionnaires')->group(function () {
         Route::get('/',                             [QuestionnaireController::class, 'index']);
@@ -76,7 +76,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/create',                      [RuleController::class, 'create']); // Create new rule
         Route::post('/assign',                      [RuleController::class, 'assign']); // Assign rule to participant
         Route::get('/participant/{participantId}',  [RuleController::class, 'getRulesForParticipant']); // App fetches
-        Route::get('/researcher/{researcherId}',    [RuleController::class, 'getRulesForResearcher']); // Web fetches
+        Route::get('/researcher/{researcherId}',    [RuleController::class, 'getUserRules']); // Web fetches
     });
 
 });

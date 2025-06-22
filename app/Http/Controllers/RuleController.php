@@ -10,16 +10,15 @@ use App\Models\DynamicRule;
 class RuleController extends Controller
 {
     //
-    public function getUserRules(Request $request)
+    public function getUserRules(Request $request, $researcherId)
     {
-        $researcherId = Auth::user()->id ?? $request->user()->id;
-        $assignments = RuleAssignment::with('rule', 'participant')
+        $rules = DynamicRule::with('assignments.participant')
         ->where('researcher_id', $researcherId)
         ->get();
 
         return response()->json([
             'success' => true,
-            'assignments' => $assignments
+            'rules' => $rules
         ]);
     }
 
@@ -32,33 +31,44 @@ class RuleController extends Controller
             'condition' => 'required|array',
             'action' => 'required|array',
             'evaluation_window' => 'required|string',
-            'effective_days' => 'required|array'
+            'effective_days' => 'required|array',
+            'notes' => 'required|string'
         ]);
-
-        $rule = DynamicRule::create($validated);
-
+    
+        $rule = DynamicRule::create(array_merge($validated, [
+            'researcher_id' => Auth::id()
+        ]));
+    
         return response()->json([
             'success' => true,
             'rule' => $rule
         ]);
     }
-
     public function assign(Request $request)
     {
         $validated = $request->validate([
             'rule_id' => 'required|exists:dynamic_rules,id',
-            'researcher_id' => 'required|exists:users,id',
             'participant_id' => 'required|exists:appusers,id'
         ]);
-
-        $assignment = RuleAssignment::create($validated);
-
+    
+        $rule = DynamicRule::find($validated['rule_id']);
+    
+        // Confirm the authenticated user is the owner
+        if ($rule->researcher_id !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+    
+        $assignment = RuleAssignment::firstOrCreate([
+            'rule_id' => $rule->id,
+            'researcher_id' => $rule->researcher_id,
+            'participant_id' => $validated['participant_id']
+        ]);
+    
         return response()->json([
             'success' => true,
             'assignment' => $assignment
         ]);
     }
-
     public function getRulesForParticipant($participantId)
     {
         $rules = RuleAssignment::with('rule')
@@ -69,18 +79,6 @@ class RuleController extends Controller
         return response()->json([
             'success' => true,
             'rules' => $rules
-        ]);
-    }
-
-    public function getRulesForResearcher($researcherId)
-    {
-        $assignments = RuleAssignment::with('rule', 'participant')
-            ->where('researcher_id', $researcherId)
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'assignments' => $assignments
         ]);
     }
 }

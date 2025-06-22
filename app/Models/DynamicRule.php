@@ -15,7 +15,8 @@ class DynamicRule extends Model
         'condition',
         'action',
         'evaluation_window',
-        'effective_days'
+        'effective_days',
+        'researcher_id'
     ];
 
     protected $casts = [
@@ -25,6 +26,11 @@ class DynamicRule extends Model
         'action' => 'array',
         'effective_days' => 'array',
     ];
+
+    public function researcher()
+    {
+        return $this->belongsTo(User::class, 'researcher_id');
+    }
     public function assignments()
     {
         return $this->hasMany(RuleAssignment::class, 'rule_id');

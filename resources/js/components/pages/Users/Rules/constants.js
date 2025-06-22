@@ -1,5 +1,3 @@
-// constants.js
-
 export const DAYS_OF_WEEK = [
     { label: 'Monday', value: 'Monday' },
     { label: 'Tuesday', value: 'Tuesday' },
@@ -7,13 +5,12 @@ export const DAYS_OF_WEEK = [
     { label: 'Thursday', value: 'Thursday' },
     { label: 'Friday', value: 'Friday' },
     { label: 'Saturday', value: 'Saturday' },
-    { label: 'Sunday', value: 'Sunday' },
+    { label: 'Sunday', value: 'Sunday' }
 ];
 
 export const METRIC_OPTIONS = [
-    { label: 'Daily Usage (Minutes)', value: 'daily_usage_minutes' },
-    { label: 'Launch Count', value: 'launch_count' },
-    { label: 'Time of Day Usage', value: 'time_of_day' },
+    { label: 'Screen Time (minutes)', value: 'screen_time' },
+    { label: 'App Launches', value: 'app_launches' }
 ];
 
 export const OPERATOR_OPTIONS = [
@@ -21,16 +18,18 @@ export const OPERATOR_OPTIONS = [
     { label: '<', value: '<' },
     { label: '>=', value: '>=' },
     { label: '<=', value: '<=' },
-    { label: '=', value: '=' },
+    { label: '==', value: '==' },
+    { label: '!=', value: '!=' }
 ];
 
 export const ACTION_TYPES = [
-    { label: 'Block App', value: 'block' },
-    { label: 'Limit Usage', value: 'limit' },
-    { label: 'Send Notification', value: 'notify' },
+    { label: 'Notify', value: 'notify' },
+    { label: 'Limit', value: 'limit' },
+    { label: 'Block', value: 'block' }
 ];
 
 export const EVALUATION_WINDOWS = [
     { label: 'Daily', value: 'daily' },
     { label: 'Weekly', value: 'weekly' },
+    { label: 'Monthly', value: 'monthly' }
 ];

@@ -23,7 +23,8 @@ class DatabaseSeeder extends Seeder
             AppUserSeeder::class,
             PhoneUseInfoSeeder::class,
             AppUseInfoSeeder::class,
-            PhoneUseInfoSeeder::class
+            PhoneUseInfoSeeder::class,
+            DefaultAppsSeeder::class,
         ]);
     }
 }

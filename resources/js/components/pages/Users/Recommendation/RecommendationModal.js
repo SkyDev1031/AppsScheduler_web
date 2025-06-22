@@ -7,7 +7,7 @@ import { Divider } from 'primereact/divider';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { useState, useEffect } from 'react';
-import { getAppPackagesApi } from '../../../api/RecommendationAPI';
+import { getAppPackagesApi } from '../../../api/AppPackagesAPI';
 
 
 // Days of week options
