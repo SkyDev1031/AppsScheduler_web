@@ -10,11 +10,11 @@ import {
     deleteCategoryApi,
     createCategoryApi,
     updateCategoryApi,
-} from '../../api/CategoryAPI';
-import { useGlobalContext } from '../../contexts';
-import { toast_success, toast_error } from '../../utils';
-import { _ERROR_CODES } from '../../config';
-import useAuth from '../../hooks/useAuth';
+} from '../../../api/CategoryAPI';
+import { useGlobalContext } from '../../../contexts';
+import { toast_success, toast_error } from '../../../utils';
+import { _ERROR_CODES } from '../../../config';
+import useAuth from '../../../hooks/useAuth';
 import { Tag } from 'primereact/tag';
 
 const CategoryManagement = () => {

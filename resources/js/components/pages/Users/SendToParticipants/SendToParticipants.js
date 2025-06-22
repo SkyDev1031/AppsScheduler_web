@@ -6,10 +6,10 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { FilterMatchMode } from 'primereact/api';
-import { getParticipantsApi, sendNotificationApi } from '../../api/ParticipantAPI.js';
-import { useGlobalContext } from "../../contexts";
-import { toast_success, toast_error } from '../../utils/index.js';
-import { _ERROR_CODES } from '../../config';
+import { getParticipantsApi, sendNotificationApi } from '../../../api/ParticipantAPI.js';
+import { useGlobalContext } from "../../../contexts/index.js";
+import { toast_success, toast_error } from '../../../utils/index.js';
+import { _ERROR_CODES } from '../../../config/index.js';
 import { Badge } from 'primereact/badge';
 
 const SendToParticipants = () => {

@@ -6,11 +6,11 @@ import { Button } from 'primereact/button';
 import { Tooltip } from 'primereact/tooltip';
 import { Dialog } from 'primereact/dialog';
 import { FilterMatchMode } from 'primereact/api';
-import { deleteNotificationApi, markAsReadApi, markAsUnreadApi, getNotificationsApi } from '../../api/NotificationAPI';
-import { useGlobalContext } from "../../contexts";
-import { toast_success, toast_error } from '../../utils';
-import { _ERROR_CODES } from '../../config';
-import useAuth from '../../hooks/useAuth';
+import { deleteNotificationApi, markAsReadApi, markAsUnreadApi, getNotificationsApi } from '../../../api/NotificationAPI';
+import { useGlobalContext } from "../../../contexts";
+import { toast_success, toast_error } from '../../../utils';
+import { _ERROR_CODES } from '../../../config';
+import useAuth from '../../../hooks/useAuth';
 
 const NotificationManagement = () => {
     const [query, setQuery] = useState('');
