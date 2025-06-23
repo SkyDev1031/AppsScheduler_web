@@ -5,13 +5,19 @@ use App\Models\{Questionnaire, Question, QuestionOption, QuestionnaireAssignment
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\SendPushNotification;
+use Illuminate\Support\Facades\Auth;
 
 class QuestionnaireController extends Controller
 {
     public function index()
     {
         try {
-            $questionnaires = Questionnaire::withCount(['assignments', 'responses'])->latest()->get();
+            $researcherId = Auth::id();
+            if (!$researcherId) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+    
+            $questionnaires = Questionnaire::withCount(['assignments', 'responses'])->where('researcher_id', $researcherId)->latest()->get();
 
             return response()->json(["data" => $questionnaires], 200);    
         } 

@@ -41,7 +41,7 @@ class CategoryController extends Controller
 
     public function index()
     {
-        $researcherId = Auth::user()->id;
+        $researcherId = Auth::id();
     
         if (Category::where('researcher_id', $researcherId)->count() === 0) {
             $this->ensureDefaultCategories($researcherId);

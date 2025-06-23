@@ -8,15 +8,19 @@ use Illuminate\Support\Facades\DB;
 use App\Jobs\SendPushNotification;
 use App\Models\AppUser;
 use Google\Service\CloudControlsPartnerService\Console;
-use Google\Service\ServiceControl\Auth;
 use Google\Service\Slides\Autofit;
 use App\Models\SendRecommendation;
+use Illuminate\Support\Facades\Auth;
 
 class RecommendationController extends Controller
 {
     public function index()
     {
-        return Recommendation::with('schedules', 'sends')->get();
+        $researcherId = Auth::id();
+        if (!$researcherId) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        return Recommendation::with('schedules', 'sends')->where('researcher_id', $researcherId)->get();
     }
 
     public function store(Request $request)
