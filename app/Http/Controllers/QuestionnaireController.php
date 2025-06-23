@@ -206,6 +206,7 @@ class QuestionnaireController extends Controller
                     $query->whereNull('completed_at');
                 }
             ])
+            ->where('researcher_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get();
 
