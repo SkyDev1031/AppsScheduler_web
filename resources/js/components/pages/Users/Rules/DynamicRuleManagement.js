@@ -39,7 +39,7 @@ const DynamicRuleManagement = () => {
     const [assignModalVisible, setAssignModalVisible] = useState(false);
 
     const { _user } = useAuth();
-    const { setLoading } = useGlobalContext();
+    const { setLoading, confirmDialog } = useGlobalContext();
     const isMounted = useRef(true);
 
     useEffect(() => {
@@ -117,7 +117,7 @@ const DynamicRuleManagement = () => {
         }
 
         // Additional validation for time-based actions
-        if ((form.action.type === 'block' || form.action.type === 'limit') && 
+        if ((form.action.type === 'limit') && 
             (!form.action.start_time || !form.action.end_time)) {
             toast_error('Start and end time are required for this action type');
             return;
@@ -160,8 +160,11 @@ const DynamicRuleManagement = () => {
     };
 
     const handleDelete = async (rule) => {
+        const isDelete = await confirmDialog('Delete', 'Are you sure you want to delete rule?');
+        if(!isDelete) return;
         setLoading(true);
         try {
+            console.log("**************", rule.id)
             await deleteRuleApi(rule.id);
             toast_success('Rule deleted');
             fetchRules();
@@ -186,6 +189,7 @@ const DynamicRuleManagement = () => {
             const res = await sendRulesToParticipantsApi(participants, selectedRules);
             toast_success('Rules assigned successfully');
             setAssignModalVisible(false);
+            fetchRules()
         } catch (err) {
             toast_error(err.message || 'Failed to assign rules');
         } finally {

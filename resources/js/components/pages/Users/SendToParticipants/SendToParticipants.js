@@ -57,7 +57,7 @@ const SendToParticipants = () => {
             return;
         }
 
-        const isConfirm = await confirmDialog('Are you sure you want to send this notification?');
+        const isConfirm = await confirmDialog('Send', 'Are you sure you want to send this notification?');
         if (!isConfirm) return;
 
         setLoading(true);

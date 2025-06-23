@@ -79,7 +79,7 @@ const RecommendationManagement = () => {
 
 
     const handleDelete = async (data) => {
-        const isDelete = await globalConfirmDialog('Are you sure you want to delete this study group?');
+        const isDelete = await globalConfirmDialog('Delete', 'Are you sure you want to delete this recommendation?');
         if (!isDelete) {
             return;
         }

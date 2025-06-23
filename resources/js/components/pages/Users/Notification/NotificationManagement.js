@@ -50,7 +50,7 @@ const NotificationManagement = () => {
     }, []);
 
     const handleDelete = async (notification) => {
-        const isDelete = await confirmDialog('Are you sure you want to delete this notification?');
+        const isDelete = await confirmDialog('Delete', 'Are you sure you want to delete this notification?');
         if (!isDelete) return;
 
         setLoading(true);
@@ -127,7 +127,7 @@ const NotificationManagement = () => {
             return;
         }
 
-        const isDelete = await confirmDialog('Are you sure you want to delete all selected notifications?');
+        const isDelete = await confirmDialog('Delete', 'Are you sure you want to delete all selected notifications?');
         if (!isDelete) return;
 
         setLoading(true);

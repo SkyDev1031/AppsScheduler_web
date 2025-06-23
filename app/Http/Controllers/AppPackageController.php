@@ -13,7 +13,7 @@ class AppPackageController extends Controller
         try {
             $packages = DB::table('app_use_infos')
                 ->select(
-                    'app_package_name as value',
+                    'app_name as value',
                     'app_name as label'
                 )
                 ->distinct()
@@ -21,7 +21,7 @@ class AppPackageController extends Controller
                 ->union(
                     DB::table('default_apps')
                         ->select(
-                            'app_package_name as value',
+                            'app_name as value',
                             'app_name as label'
                         )
                         ->distinct()

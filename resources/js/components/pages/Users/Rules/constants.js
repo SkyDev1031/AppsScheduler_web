@@ -10,7 +10,6 @@ export const DAYS_OF_WEEK = [
 
 export const METRIC_OPTIONS = [
     { label: 'Screen Time (minutes)', value: 'screen_time' },
-    { label: 'App Launches', value: 'app_launches' }
 ];
 
 export const OPERATOR_OPTIONS = [
@@ -23,7 +22,7 @@ export const OPERATOR_OPTIONS = [
 ];
 
 export const ACTION_TYPES = [
-    { label: 'Notify', value: 'notify' },
+    // { label: 'Notify', value: 'notify' },
     { label: 'Limit', value: 'limit' },
     { label: 'Block', value: 'block' }
 ];

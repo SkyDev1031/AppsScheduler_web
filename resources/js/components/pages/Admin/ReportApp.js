@@ -55,7 +55,7 @@ const ReportApp = () => {
     };
     const OnActions = async (data, type) => {
         if (type === _ACT_TYPE.DELETE) {
-            const isDelete = await confirmDialog('Are you sure you want to delete this data?');
+            const isDelete = await confirmDialog('Delete', 'Are you sure you want to delete this data?');
             if (!isDelete) return;
             deleteAppUseInfosApi(data.phonenumber)
                 .then(res => {

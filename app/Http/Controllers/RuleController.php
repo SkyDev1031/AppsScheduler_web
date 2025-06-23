@@ -73,6 +73,38 @@ class RuleController extends Controller
         ]);
     }
 
+    public function destroy($id)
+    {
+        try {
+            $rule = DynamicRule::findOrFail($id);
+    
+            // Ensure only the owner can delete the rule
+            if ($rule->researcher_id !== Auth::id()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Unauthorized to delete this rule'
+                ], 403);
+            }
+    
+            // Delete associated assignments first
+            RuleAssignment::where('rule_id', $id)->delete();
+    
+            // Delete the rule
+            $rule->delete();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Rule and its assignments deleted successfully'
+            ]);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete rule: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function assign(Request $request)
     {
         $validated = $request->validate([

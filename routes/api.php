@@ -75,6 +75,7 @@ Route::middleware('auth:api')->group(function () {
     Route::prefix('rules')->group(function () {
         Route::post('/create',                      [RuleController::class, 'create']); // Create new rule
         Route::put('/{id}',                         [RuleController::class, 'update']);
+        Route::delete('/{id}',                      [RuleController::class, 'destroy']);
         Route::post('/assign',                      [RuleController::class, 'assign']); // Assign rule to participant
         Route::get('/participant/{participantId}',  [RuleController::class, 'getRulesForParticipant']); // App fetches
         Route::get('/researcher/{researcherId}',    [RuleController::class, 'getUserRules']); // Web fetches

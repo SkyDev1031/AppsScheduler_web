@@ -53,7 +53,7 @@ const CategoryManagement = () => {
     };
 
     const handleDelete = async (category) => {
-        const isDelete = await confirmDialog('Are you sure you want to delete this category?');
+        const isDelete = await confirmDialog('Delete', 'Are you sure you want to delete this category?');
         if (!isDelete) return;
 
         setLoading(true);

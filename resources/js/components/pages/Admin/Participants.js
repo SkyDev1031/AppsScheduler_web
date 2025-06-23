@@ -152,7 +152,7 @@ const Participants = () => {
     };
 
     const handleDelete = async (participant) => {
-        const isDelete = await confirmDialog('Are you sure you want to delete this participant?');
+        const isDelete = await confirmDialog('Delete', 'Are you sure you want to delete this participant?');
         if (!isDelete) return;
         
         setLoading(true);

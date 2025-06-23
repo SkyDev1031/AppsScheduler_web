@@ -104,7 +104,7 @@ export default function StudyManagement() {
 
     // Delay slightly to allow modal to close fully before showing confirmDialog
     setTimeout(async () => {
-      const isDelete = await confirmDialog('Are you sure you want to cancel this invitation?');
+      const isDelete = await confirmDialog('Cancel', 'Are you sure you want to cancel this invitation?');
       if (!isDelete) {
         setParticipantsModalOpen(true); // reopen if cancelled
         return;

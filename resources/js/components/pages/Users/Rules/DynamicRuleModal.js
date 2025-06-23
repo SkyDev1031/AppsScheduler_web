@@ -300,7 +300,7 @@ const DynamicRuleModal = ({
                                 />
                             </div>
                             
-                            {(form.action.type === 'block' || form.action.type === 'limit') && (
+                            {(form.action.type === 'limit') && (
                                 <>
                                     <div className="field col-12 md:col-4">
                                         <label htmlFor="startTime">Start Time</label>
