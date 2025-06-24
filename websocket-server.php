@@ -26,13 +26,13 @@ $server = new IoServer(
 );
 
 // ✅ TCP bridge for Laravel -> WebSocket messages
-$tcp = stream_socket_server("tcp://127.0.0.1:5555", $errno, $errstr);
+$tcp = stream_socket_server("tcp://127.0.0.1:5678", $errno, $errstr);
 if (!$tcp) {
     echo "[ERROR] Failed to start TCP bridge: $errstr ($errno)\n";
     exit(1);
 }
 stream_set_blocking($tcp, false);
-echo "[INFO] TCP bridge listening on 127.0.0.1:5555 for Laravel input\n";
+echo "[INFO] TCP bridge listening on 127.0.0.1:5678 for Laravel input\n";
 
 // 🔁 Listen for Laravel messages
 $loop->addReadStream($tcp, function ($tcp) use ($app) {

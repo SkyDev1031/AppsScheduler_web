@@ -22,8 +22,8 @@ class WebSocketNotifier
             'message' => is_array($message) ? $message : ['text' => $message],
         ]);
 
-        // Connect to your WebSocket server's local TCP bridge (127.0.0.1:5555)
-        $fp = @stream_socket_client("tcp://127.0.0.1:5555", $errno, $errstr, 5); // 5s timeout
+        // Connect to your WebSocket server's local TCP bridge (127.0.0.1:5678)
+        $fp = @stream_socket_client("tcp://127.0.0.1:5678", $errno, $errstr, 5); // 5s timeout
 
         if (!$fp) {
             throw new \Exception("Could not connect to WebSocket server: $errstr ($errno)");

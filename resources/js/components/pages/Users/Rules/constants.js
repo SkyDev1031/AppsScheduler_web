@@ -23,8 +23,8 @@ export const OPERATOR_OPTIONS = [
 
 export const ACTION_TYPES = [
     // { label: 'Notify', value: 'notify' },
+    { label: 'Block', value: 'block' },
     { label: 'Limit', value: 'limit' },
-    { label: 'Block', value: 'block' }
 ];
 
 export const EVALUATION_WINDOWS = [
