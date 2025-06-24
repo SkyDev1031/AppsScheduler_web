@@ -22,7 +22,7 @@ export const OPERATOR_OPTIONS = [
 ];
 
 export const ACTION_TYPES = [
-    // { label: 'Notify', value: 'notify' },
+    { label: 'Notify', value: 'notify' },
     { label: 'Block', value: 'block' },
     { label: 'Limit', value: 'limit' },
 ];
