@@ -7,7 +7,7 @@ import { Divider } from 'primereact/divider';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { useState, useEffect } from 'react';
-import { getAppPackagesApi } from '../../../api/AppPackagesAPI';
+import { getAppPackagesByAppPackageApi } from '../../../api/AppPackagesAPI';
 
 
 // Days of week options
@@ -29,7 +29,7 @@ const RecommendationModal = ({ dialogVisible, setDialogVisible, editing, handleS
     }, [])
     const fetchAppPackages = async () => {
         try {
-            const res = await getAppPackagesApi();
+            const res = await getAppPackagesByAppPackageApi();
             if (isMounted.current) {
                 setAvailableAppPackages(
                     res.packages

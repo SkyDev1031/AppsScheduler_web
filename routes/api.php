@@ -43,7 +43,9 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/cancel',                      [StudyParticipantRequestController::class, 'cancel']);   // researcher
     });    
 
-    Route::post('/packages',                            [AppPackageController::class, 'getAllPackages']);
+    Route::post('/packages/appname',                [AppPackageController::class, 'getAllPackagesByAppName']);
+    Route::post('/packages/apppackage',             [AppPackageController::class, 'getAllPackagesByAppPackageName']);
+
     Route::prefix('categories')->group(function () {
         Route::get('/',                                 [CategoryController::class, 'index']);
         Route::post('/',                                [CategoryController::class, 'store']);

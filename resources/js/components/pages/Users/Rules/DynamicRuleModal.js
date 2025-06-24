@@ -15,7 +15,7 @@ import {
     EVALUATION_WINDOWS
 } from './constants';
 
-import { getAppPackagesApi } from '../../../api/AppPackagesAPI';
+import { getAppPackagesByAppNameApi } from '../../../api/AppPackagesAPI';
 import { getCategoriesApi } from '../../../api/CategoryAPI';
 import { useGlobalContext } from '../../../contexts';
 
@@ -69,7 +69,7 @@ const DynamicRuleModal = ({
             setLoading(true);
             try {
                 const [pkgRes, catRes] = await Promise.all([
-                    getAppPackagesApi(),
+                    getAppPackagesByAppNameApi(),
                     getCategoriesApi()
                 ]);
                 if (isMounted.current) {
