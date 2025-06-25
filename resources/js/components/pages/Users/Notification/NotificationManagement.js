@@ -25,7 +25,7 @@ const NotificationManagement = () => {
         const fetchNotifications = async () => {
             setLoading(true);
             try {
-                const response = await getNotificationsApi();
+                const response = await getNotificationsApi(_user.id);
                 if (isMounted.current) {
                     clearNotifications();
                     response.data.forEach((notification) => addNotification(notification));

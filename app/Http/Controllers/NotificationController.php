@@ -9,45 +9,22 @@ use App\Events\NotificationSent; // Import the event
 use Illuminate\Support\Facades\Log; // Import Log for debugging
 use App\Models\StudyParticipantRequest;
 use App\Models\Study;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class NotificationController extends Controller
 {    
-    public function index(Request $request)
+    public function index($id)
     {
-        $userId = $request->user_id;
-        if (!$userId) {
-            // Return all notifications joined with appusers
-            $notifications = DB::table('notifications')
-                ->join('appusers', 'notifications.id_appuser', '=', 'appusers.id')
-                ->orderBy('notifications.accept_time', 'desc')
-                ->select(
-                    'notifications.*',
-                    'appusers.userID as userID'
-                )
-                ->get();
-        } else {
-            // Get studies managed by this researcher
-            $studyIds = DB::table('studies')
-                ->where('researcher_id', $userId)
-                ->pluck('id');
-    
-            // Get participant IDs in those studies
-            $participantIds = DB::table('study_participant_requests')
-                ->whereIn('study_id', $studyIds)
-                ->pluck('participant_id');
-    
-            // Get notifications joined with appusers, filtered by those participant IDs
-            $notifications = DB::table('notifications')
-                ->join('appusers', 'notifications.id_appuser', '=', 'appusers.id')
-                ->whereIn('notifications.id_appuser', $participantIds)
-                ->orderBy('notifications.accept_time', 'desc')
-                ->select(
-                    'notifications.*',
-                    'appusers.userID as userID'
-                )
-                ->get();
-        }
+        // Return all notifications joined with appusers
+        $notifications = DB::table('notifications')
+            ->join('appusers', 'notifications.id_appuser', '=', 'appusers.id')
+            ->orderBy('notifications.accept_time', 'desc')
+            ->select(
+                'notifications.*',
+                'appusers.userID as userID'
+            )
+            ->get();
     
         return response()->json([
             'data' => $notifications,
@@ -128,17 +105,31 @@ class NotificationController extends Controller
 
     public function show($id)
     {
-        $notification = Notification::find($id);
+        $userId = Auth::id() ?? $id;
+        // Get studies managed by this researcher
+        $studyIds = DB::table('studies')
+            ->where('researcher_id', $userId)
+            ->pluck('id');
 
-        if (!$notification) {
-            return response()->json([
-                'message' => 'Notification not found.',
-                'success' => false,
-            ], 200);
-        }
+        // Get participant IDs in those studies
+        $participantIds = DB::table('study_participant_requests')
+            ->whereIn('study_id', $studyIds)
+            ->pluck('participant_id');
+
+        // Get notifications joined with appusers, filtered by those participant IDs
+        $notifications = DB::table('notifications')
+            ->join('appusers', 'notifications.id_appuser', '=', 'appusers.id')
+            ->whereIn('notifications.id_appuser', $participantIds)
+            ->orderBy('notifications.accept_time', 'desc')
+            ->select(
+                'notifications.*',
+                'appusers.userID as userID'
+            )
+            ->get();
+    
 
         return response()->json([
-            'data' => $notification,
+            'data' => $notifications,
             'message' => 'Notification retrieved successfully.',
             'success' => true,
         ], 200);

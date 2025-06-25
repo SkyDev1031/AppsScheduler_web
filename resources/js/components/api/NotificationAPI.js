@@ -4,7 +4,7 @@ import { _REQUEST, _REQ_METHOD } from './index';
  * App Usage Information APIs
  */
 // Notification APIs
-export const getNotificationsApi = (user_id = 0) => _REQUEST('notifications', _REQ_METHOD.GET, {user_id});
+export const getNotificationsApi = (user_id = 0) => _REQUEST(`notifications/${user_id}`, _REQ_METHOD.GET, {user_id});
 
 export const createNotificationApi = (data) => _REQUEST('notifications', _REQ_METHOD.POST, data);
 
