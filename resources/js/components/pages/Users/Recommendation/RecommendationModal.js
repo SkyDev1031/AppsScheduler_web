@@ -309,8 +309,7 @@ const RecommendationModal = ({ dialogVisible, setDialogVisible, editing, handleS
                             </div>
                             <div className="flex justify-content-end" style={{ display: 'flex', justifyContent: 'end' }}>
                                 <Button
-                                    label='Remove schedule'
-                                    style={{ width: '25%' }}
+                                    icon='pi pi-trash'
                                     className="p-button-sm p-button-danger"
                                     onClick={() => handleRemoveSchedule(schedIdx)}
                                     tooltip="Remove this schedule"

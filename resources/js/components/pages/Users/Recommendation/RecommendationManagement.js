@@ -68,6 +68,7 @@ const RecommendationManagement = () => {
         try {
             const res = await getRecommendationsApi(_user.id);
             if (isMounted.current) {
+                setSelectedRecommendations([]);
                 setRecommendations(res || []);
             }
         } catch (err) {

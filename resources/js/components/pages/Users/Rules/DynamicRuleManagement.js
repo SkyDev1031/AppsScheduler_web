@@ -53,7 +53,7 @@ const DynamicRuleManagement = () => {
         setLoading(true);
         try {
             const res = await getRulesByResearcherApi(_user.id);
-            console.log("----------res--------------", res)
+            setSelectedRules([]);
             if (isMounted.current && res?.rules) {
                 const uniqueRules = res.rules.map(a => ({
                     ...a,

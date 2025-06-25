@@ -33,6 +33,8 @@ const QuestionnaireManagement = () => {
 
     const loadData = () => {
         setLoading(true)
+        setSelectedQuestionnaire(null);
+        setEditingQuestionnaire(null);
         getAllQuestionnaires()
             .then(res => {
                 setQuestionnaires(res.data || []);
