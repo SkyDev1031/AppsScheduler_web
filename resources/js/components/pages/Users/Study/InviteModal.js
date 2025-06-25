@@ -65,7 +65,7 @@ export default function InviteModal({ open, onClose, study, onInvited }) {
             }
         } catch (error) {
             console.error('Invite error:', error);
-            toast_error('Error inviting participant');
+            toast_error('An error occurred while inviting the participant. Please try again later.');
         } finally {
             setInvitingId(null);
         }

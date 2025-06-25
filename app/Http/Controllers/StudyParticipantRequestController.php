@@ -25,6 +25,25 @@ class StudyParticipantRequestController extends Controller
         // Make sure the authenticated user owns the study
         abort_unless($study->researcher_id === $request->user()->id, 403);
     
+        // Check if participant is already invited to any other study
+        $existingInvite = StudyParticipantRequest::where('participant_id', $data['participant_id'])
+            ->whereHas('study', function ($query) use ($request) {
+                $query->where('researcher_id', '!=', $request->user()->id);
+            })
+            ->whereIn('study_status', ['Pending', 'Approved'])
+            ->first();
+    
+        if ($existingInvite) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'This participant is already invited to another study.',
+                'existing_invite' => [
+                    'study_title' => $existingInvite->study->title,
+                    'status' => $existingInvite->study_status
+                ]
+            ], 200);
+        }
+    
         // Try to find or create the invite
         [$invite, $created] = StudyParticipantRequest::firstOrCreate(
             $data,
@@ -32,9 +51,6 @@ class StudyParticipantRequestController extends Controller
         )->wasRecentlyCreated
             ? [$invite = StudyParticipantRequest::where($data)->first(), true]
             : [$invite = StudyParticipantRequest::where($data)->first(), false];
-    
-        // Optionally trigger notification here
-        // Notification::send($invite->participant, new StudyInviteNotification($invite));
     
         if ($created) {
             // Send a notification to the participant
