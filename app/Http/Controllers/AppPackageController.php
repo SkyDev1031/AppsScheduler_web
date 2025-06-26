@@ -14,7 +14,7 @@ class AppPackageController extends Controller
             $packages = DB::table('app_use_infos')
                 ->select(
                     'app_name as value',
-                    'app_name as label'
+                    DB::raw("CONCAT(app_name, ' (', app_package_name, ')') as label")
                 )
                 ->distinct()
     
@@ -22,7 +22,7 @@ class AppPackageController extends Controller
                     DB::table('default_apps')
                         ->select(
                             'app_name as value',
-                            'app_name as label'
+                            DB::raw("CONCAT(app_name, ' (', app_package_name, ')') as label")
                         )
                         ->distinct()
                 )
@@ -48,7 +48,7 @@ class AppPackageController extends Controller
             $packages = DB::table('app_use_infos')
                 ->select(
                     'app_package_name as value',
-                    'app_name as label'
+                    DB::raw("CONCAT(app_name, ' (', app_package_name, ')') as label")
                 )
                 ->distinct()
     
@@ -56,7 +56,7 @@ class AppPackageController extends Controller
                     DB::table('default_apps')
                         ->select(
                             'app_package_name as value',
-                            'app_name as label'
+                            DB::raw("CONCAT(app_name, ' (', app_package_name, ')') as label")
                         )
                         ->distinct()
                 )
