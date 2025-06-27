@@ -18,13 +18,22 @@ class NotificationController extends Controller
     {
         $researcherId = Auth::id();
         // Get notifications joined with appusers, filtered by those participant IDs
-        $notifications = Notification::where(['researcher_id' => $researcherId])
+        $notifications = Notification::with(['appUser'])
+            ->where('researcher_id', $researcherId)
+            ->orderBy('accept_time', 'desc')
             ->get();
-        return $notifications;
-    
-
+        $data = $notifications->map(function($n) {
+            return [
+                'id' => $n->id,
+                'title' => $n->title,
+                'content' => $n->content,
+                'accept_time' => $n->accept_time,
+                'read_status' => $n->read_status,
+                'userID' => $n->appUser->userID
+            ];
+        });
         return response()->json([
-            'data' => $notifications,
+            'data' => $data,
             'message' => 'Notification retrieved successfully.',
             'success' => true,
         ], 200);
@@ -39,7 +48,7 @@ class NotificationController extends Controller
         ]);
         $validated = $request->validate([
             'researcher_id' => 'required|integer', // Ensure researcher_id exists in users table
-            'id_appuser' => 'required|integer',
+            'participant_id' => 'required|integer',
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'read_status' => 'boolean',
@@ -48,12 +57,12 @@ class NotificationController extends Controller
         ]);
         try {
             $participantID = DB::table('appusers')
-                ->where('id', $validated['id_appuser'])
+                ->where('id', $validated['participant_id'])
                 ->value('userID');
     
             // Step 1: Get studies where the AppUser is a participant
             $studyIds = DB::table('study_participant_requests')
-                ->where('participant_id', $validated['id_appuser'])
+                ->where('participant_id', $validated['participant_id'])
                 ->pluck('study_id');
     
             // Step 2: Get unique researcher_ids for those studies

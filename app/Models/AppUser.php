@@ -48,4 +48,9 @@ class AppUser extends Model
     {
         return $this->hasMany(RuleAssignment::class, 'participant_id');
     }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'participant_id');
+    }
 }

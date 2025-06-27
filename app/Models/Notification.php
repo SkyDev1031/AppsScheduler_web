@@ -20,7 +20,7 @@ class Notification extends Model
     // Mass assignable attributes
     protected $fillable = [
         'researcher_id',
-        'id_appuser',
+        'participant_id',
         'title',
         'content',
         'read_status',
@@ -37,6 +37,6 @@ class Notification extends Model
 
     public function appUser()
     {
-        return $this->belongsTo(AppUser::class, 'id_appuser');
+        return $this->belongsTo(AppUser::class, 'participant_id');
     }
 }
