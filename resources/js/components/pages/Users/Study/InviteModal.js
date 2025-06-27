@@ -20,30 +20,28 @@ import { faUser, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { inviteParticipant } from '../../../api/StudyAPI';
 import { getParticipantsApi } from '../../../api/ParticipantAPI';
 import { toast_error, toast_success } from '../../../utils';
+import { useGlobalContext } from "../../../contexts";
+
 
 export default function InviteModal({ open, onClose, study, onInvited }) {
     const [participants, setParticipants] = useState([]);
     const [invitingId, setInvitingId] = useState(null);
-
+    const { setLoading } = useGlobalContext();
     useEffect(() => {
         if (open) {
+            setLoading(true)
             getParticipantsApi().then((res) => {
-                let rawList = [];
-
                 if (Array.isArray(res.data)) {
-                    rawList = res.data;
-                } else if (res.data && Array.isArray(res.data.participants)) {
-                    rawList = res.data.participants;
+                    setParticipants(res.data);
                 } else {
                     console.error('Unexpected participant response:', res.data);
+                    setParticipants([]);
                 }
-
-                // ✅ Filter only 'Active' participants
-                const activeParticipants = rawList.filter(p => p.status === 'Active');
-                setParticipants(activeParticipants);
             }).catch((err) => {
                 console.error('Failed to fetch participants:', err);
                 setParticipants([]);
+            }).finally(() => {
+                setLoading(false);
             });
         }
     }, [open]);
@@ -95,10 +93,12 @@ export default function InviteModal({ open, onClose, study, onInvited }) {
                                             variant="contained"
                                             size="small"
                                             color="primary"
-                                            disabled={invitingId === p.id}
+                                            disabled={invitingId === p.id || (p.studies || []).some(s => s.invitationStatus === 'approved')}
                                             sx={{ minWidth: 100 }}
                                         >
-                                            {invitingId === p.id ? 'Inviting...' : 'Invite'}
+                                            {(p.studies || []).some(s => s.invitationStatus === 'approved')
+                                                ? 'Invited'
+                                                : (invitingId === p.id ? 'Inviting...' : 'Invite')}
                                         </Button>
                                     }
                                 >
@@ -108,8 +108,22 @@ export default function InviteModal({ open, onClose, study, onInvited }) {
                                         </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText
-                                        primary={p.fullName || p.userID}
-                                        // secondary={`Status: ${p.status}`}
+                                        primary={
+                                            <Box display="flex" flexDirection="column">
+                                                <Typography variant="body1" fontWeight="bold">
+                                                    {p.fullName || p.userID}
+                                                </Typography>
+                                                {p.studies && p.studies.length > 0 && (
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {p.studies.map(s => (
+                                                            <span key={s.studyGroup}>
+                                                                {s.studyGroup} [{s.invitationStatus}]
+                                                            </span>
+                                                        )).reduce((prev, curr) => [prev, ', ', curr])}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        }
                                     />
                                 </ListItem>
                                 {idx < participants.length - 1 && <Divider component="li" />}

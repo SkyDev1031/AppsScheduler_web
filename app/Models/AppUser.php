@@ -26,7 +26,7 @@ class AppUser extends Model
     public function studies()
     {
         return $this->belongsToMany(Study::class, 'study_participant_requests', 'participant_id', 'study_id')
-            ->withPivot('status')
+            ->withPivot('study_status')
             ->withTimestamps();
     }
     public function invitations()

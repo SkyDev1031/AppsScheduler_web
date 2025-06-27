@@ -14,21 +14,18 @@ use Illuminate\Support\Facades\DB;
 
 class NotificationController extends Controller
 {    
-    public function index($id)
+    public function index()
     {
-        // Return all notifications joined with appusers
-        $notifications = DB::table('notifications')
-            ->join('appusers', 'notifications.id_appuser', '=', 'appusers.id')
-            ->orderBy('notifications.accept_time', 'desc')
-            ->select(
-                'notifications.*',
-                'appusers.userID as userID'
-            )
+        $researcherId = Auth::id();
+        // Get notifications joined with appusers, filtered by those participant IDs
+        $notifications = Notification::where('researcher_id', $researcherId)
+            ->orderBy('accept_time', 'desc')
             ->get();
     
+
         return response()->json([
             'data' => $notifications,
-            'message' => 'Notifications retrieved successfully.',
+            'message' => 'Notification retrieved successfully.',
             'success' => true,
         ], 200);
     }
@@ -45,12 +42,7 @@ class NotificationController extends Controller
             'accept_time' => 'nullable|date',
             'read_time' => 'nullable|date',
         ]);
-        $validated['accept_time'] = now();
-        // print_r($validated);
         try {
-            $notification = Notification::create($validated);
-    
-            // ✅ Get userID from appusers
             $userID = DB::table('appusers')
                 ->where('id', $validated['id_appuser'])
                 ->value('userID');
@@ -66,23 +58,23 @@ class NotificationController extends Controller
                 ->pluck('researcher_id')
                 ->unique();
     
-            // ✅ Include userID in the message
-            $message = [
-				'id' => $notification->id,
-                'title' => $validated['title'],
-                'content' => $validated['content'],
-                'read_status' => false,
-                'accept_time' => $validated['accept_time'],
-                'userID' => $userID,
-                'type' => $type // Include type in the message
-            ];
     
-            // Step 3: Send to each researcher via WebSocket
+            // Step 3: Save notificatin and Send to each researcher via WebSocket
             foreach ($researcherIds as $researcherId) {
                 try {
+                    $validated['researcher_id'] = $researcherId;
+                    $validated['accept_time'] = now();
+                    $notification = Notification::create($validated);
+                    $message = [
+                        'id' => $notification->id,
+                        'title' => $validated['title'],
+                        'content' => $validated['content'],
+                        'read_status' => false,
+                        'accept_time' => $validated['accept_time'],
+                        'userID' => $userID,
+                        'type' => $type // Include type in the message
+                    ];    
                     $notifier->sendToUser($researcherId, $message);
-//                    event(new NotificationSent($message, $researcherId));
-
                 } catch (\Exception $e) {
                     return response()->json(['error' => "Failed to notify researcher $researcherId: " . $e->getMessage()], 500);
                 }
@@ -105,31 +97,13 @@ class NotificationController extends Controller
 
     public function show($id)
     {
-        $userId = Auth::id() ?? $id;
-        // Get studies managed by this researcher
-        $studyIds = DB::table('studies')
-            ->where('researcher_id', $userId)
-            ->pluck('id');
-
-        // Get participant IDs in those studies
-        $participantIds = DB::table('study_participant_requests')
-            ->whereIn('study_id', $studyIds)
-            ->pluck('participant_id');
-
         // Get notifications joined with appusers, filtered by those participant IDs
-        $notifications = DB::table('notifications')
-            ->join('appusers', 'notifications.id_appuser', '=', 'appusers.id')
-            ->whereIn('notifications.id_appuser', $participantIds)
-            ->orderBy('notifications.accept_time', 'desc')
-            ->select(
-                'notifications.*',
-                'appusers.userID as userID'
-            )
+        $notification = Notification::where('id', $id)
             ->get();
     
 
         return response()->json([
-            'data' => $notifications,
+            'data' => $notification,
             'message' => 'Notification retrieved successfully.',
             'success' => true,
         ], 200);

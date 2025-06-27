@@ -53,30 +53,38 @@ class AppUserController extends Controller
     public function getAppUsers()
     {
         try {
-            Log::info('Fetching app users...'); // Log the start of the method
-
-            $sql = "SELECT
-                id,
-                ROW_NUMBER() OVER (ORDER BY id) AS `no`,
-                userID,
-                `status`,
-                created_at
-            FROM
-            appusers";
-
-            // Execute the query and fetch results
-            $appusers = DB::select($sql);
-
-            Log::info('App users fetched successfully', ['data' => $appusers]); // Log the results
-
-            // Return the results as JSON
-            return response()->json(['data' => $appusers]);
+            Log::info('Fetching app users with study info...');
+    
+            $appusers = AppUser::with(['studies' => function($query) {
+                $query->select('studies.id', 'title'); // Fetch only what we need
+            }])->get();
+    
+            // Format result if needed
+            $formatted = $appusers->map(function ($user, $index) {
+                return [
+                    'id' => $user->id,
+                    'no' => $index + 1,
+                    'userID' => $user->userID,
+                    'status' => $user->status,
+                    'created_at' => $user->created_at,
+                    'studies' => $user->studies->map(function($study) {
+                        return [
+                            'studyID' => $study->id,
+                            'studyGroup' => $study->title,
+                            'invitationStatus' => $study->pivot->study_status ?? 'Not Invited',
+                        ];
+                    })->toArray()
+                ];
+            });
+    
+            return response()->json(['data' => $formatted]);
         } catch (\Exception $e) {
-            Log::error('Error fetching app users', ['error' => $e->getMessage()]); // Log any errors
-            return response()->json(['error' => 'Failed to fetch app users'], 500);
+            Log::error('Error fetching app users with study info', ['error' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+            // return response()->json(['error' => 'Failed to fetch app users'], 500);
         }
     }
-
+    
     public function getApprovedAppUsers(Request $request)
     {
         $studyID = $request->studyID;

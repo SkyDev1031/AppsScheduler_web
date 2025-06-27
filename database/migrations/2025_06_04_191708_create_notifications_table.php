@@ -9,7 +9,8 @@ class CreateNotificationsTable extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->id('id'); // Primary key
-            $table->id('id_appuser'); // Primary key
+            $table->integer('id_appuser');
+            $table->foreignId('researcher_id')->constrained('users')->onDelete('cascade'); // assuming researchers are users
             $table->string('title');        // Notification title
             $table->text('content');        // Notification content
             $table->boolean('read_status')->default(false); // Whether notification is read
