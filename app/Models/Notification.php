@@ -19,6 +19,7 @@ class Notification extends Model
 
     // Mass assignable attributes
     protected $fillable = [
+        'researcher_id',
         'id_appuser',
         'title',
         'content',

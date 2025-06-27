@@ -41,7 +41,6 @@ const CategoryManagement = () => {
         setLoading(true);
         try {
             const res = await getCategoriesApi();
-            console.log(res)
             if (isMounted.current) {
                 setCategories(res || []);
             }

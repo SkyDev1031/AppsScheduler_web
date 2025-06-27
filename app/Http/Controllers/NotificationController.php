@@ -34,7 +34,11 @@ class NotificationController extends Controller
     public function store(Request $request, WebSocketNotifier $notifier)
     {
         $type = $request->type ?? "default"; // Default to 'default' if not provided
+        $request->merge([
+            'researcher_id' => 0, // Default researcher_id to 0 if not provided
+        ]);
         $validated = $request->validate([
+            'researcher_id' => 'required|integer', // Ensure researcher_id exists in users table
             'id_appuser' => 'required|integer',
             'title' => 'required|string|max:255',
             'content' => 'required|string',
@@ -43,7 +47,7 @@ class NotificationController extends Controller
             'read_time' => 'nullable|date',
         ]);
         try {
-            $userID = DB::table('appusers')
+            $participantID = DB::table('appusers')
                 ->where('id', $validated['id_appuser'])
                 ->value('userID');
     
@@ -57,13 +61,16 @@ class NotificationController extends Controller
                 ->whereIn('id', $studyIds)
                 ->pluck('researcher_id')
                 ->unique();
-    
-    
             // Step 3: Save notificatin and Send to each researcher via WebSocket
+            $notification_messages = [];
+            if ($researcherIds->isEmpty()) {
+                return response()->json(['error' => 'No researchers found for the participant.'], 404);
+            }
             foreach ($researcherIds as $researcherId) {
                 try {
                     $validated['researcher_id'] = $researcherId;
                     $validated['accept_time'] = now();
+
                     $notification = Notification::create($validated);
                     $message = [
                         'id' => $notification->id,
@@ -71,9 +78,10 @@ class NotificationController extends Controller
                         'content' => $validated['content'],
                         'read_status' => false,
                         'accept_time' => $validated['accept_time'],
-                        'userID' => $userID,
+                        'userID' => $participantID,
                         'type' => $type // Include type in the message
-                    ];    
+                    ];
+                    array_push($notification_messages, $message);  
                     $notifier->sendToUser($researcherId, $message);
                 } catch (\Exception $e) {
                     return response()->json(['error' => "Failed to notify researcher $researcherId: " . $e->getMessage()], 500);
@@ -81,14 +89,14 @@ class NotificationController extends Controller
             }
     
             return response()->json([
-                'data' => $message,
+                'data' => $notification_messages,
                 'message' => 'Notification created and sent to researchers successfully.',
                 'success' => true,
             ], 200);
         } catch (\Exception $e) {
-            print_r($e->getMessage());
             return response()->json([
                 'message' => 'There was a problem creating the notification. Please try again.',
+                'err' => $e->getMessage(),
                 'success' => false,
             ], 200);
         }
