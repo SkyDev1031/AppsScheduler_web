@@ -18,9 +18,9 @@ class NotificationController extends Controller
     {
         $researcherId = Auth::id();
         // Get notifications joined with appusers, filtered by those participant IDs
-        $notifications = Notification::where('researcher_id', $researcherId)
-            ->orderBy('accept_time', 'desc')
+        $notifications = Notification::where(['researcher_id' => $researcherId])
             ->get();
+        return $notifications;
     
 
         return response()->json([

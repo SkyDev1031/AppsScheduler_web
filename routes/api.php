@@ -84,8 +84,20 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/send-to-participants',        [RuleController::class, 'sendRulesToParticipants']);
     });
 
+    Route::prefix('notifications')->group(function () {
+        Route::get('/',                                 [NotificationController::class, 'index']);
+        // Route::post('/',                                [NotificationController::class, 'store']);
+        Route::get('/{id}',                             [NotificationController::class, 'show']);
+        Route::put('/{id}',                             [NotificationController::class, 'update']);
+        Route::delete('/{id}',                          [NotificationController::class, 'destroy']);
+        Route::post('/clear',                           [NotificationController::class, 'clear']);
+        Route::put('/{id}/mark-as-read',                [NotificationController::class, 'markAsRead']);
+        Route::put('/{id}/mark-as-unread',              [NotificationController::class, 'markAsUnread']);
+        Route::put('/{id}/mark-all-as-read',            [NotificationController::class, 'markAllAsRead']);    
+    });    
 });
 
+Route::post('/notifications',                    [NotificationController::class, 'store']);
 
 // UserController(ResearcherController)
 Route::post("/login",                               [UserController::class, 'login']);
@@ -148,17 +160,6 @@ Route::prefix('/app')->group(function () {
 
 
 
-Route::prefix('notifications')->group(function () {
-    Route::get('/',                                 [NotificationController::class, 'index']);
-    Route::post('/',                                [NotificationController::class, 'store']);
-    Route::get('/{id}',                             [NotificationController::class, 'show']);
-    Route::put('/{id}',                             [NotificationController::class, 'update']);
-    Route::delete('/{id}',                          [NotificationController::class, 'destroy']);
-    Route::post('/clear',                           [NotificationController::class, 'clear']);
-    Route::put('/{id}/mark-as-read',                [NotificationController::class, 'markAsRead']);
-    Route::put('/{id}/mark-as-unread',              [NotificationController::class, 'markAsUnread']);
-    Route::put('/{id}/mark-all-as-read',            [NotificationController::class, 'markAllAsRead']);    
-});
 
 Route::get('/participants/{id}/questionnaires',     [AppUserController::class, 'getAssignedQuestionnaires']);
 Route::post('/questionnaire-responses',             [AppUserController::class, 'submitResponses']); 
