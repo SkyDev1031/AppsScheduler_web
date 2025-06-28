@@ -9,7 +9,8 @@ export const DAYS_OF_WEEK = [
 ];
 
 export const METRIC_OPTIONS = [
-    { label: 'Screen Time (minutes)', value: 'screen_time' },
+    { label: 'Usage minutes', value: 'USAGE_MINUTES' },
+    { label: 'Session count', value: 'SESSION_COUNT' },
 ];
 
 export const OPERATOR_OPTIONS = [
