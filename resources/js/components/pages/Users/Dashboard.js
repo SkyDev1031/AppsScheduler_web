@@ -11,7 +11,7 @@ import {
   ArcElement
 } from 'chart.js';
 import { Bar, Line, Pie } from 'react-chartjs-2';
-import {
+import {  
   Box,
   Card,
   CardContent,
