@@ -16,7 +16,7 @@ import { _ERROR_CODES } from '../../../config/index.js';
 import { useGlobalContext } from "../../../contexts/index.js";
 import { toast_error, toast_warning } from '../../../utils/index.js';
 import { encryptParam, decryptParam } from '../../../utils/cryptoUtils.js'
-
+import { Button as PrimeButton } from 'primereact/button';
 
 const _ACT_TYPE = {
     DEFAULT: -1,
@@ -90,6 +90,34 @@ const ViewStudyGroup = () => {
                 toast_error("Failed to fetch frequency data.");
             });
     };
+
+    const actionBodyTemplate = (rowData) => {
+        return (
+            <div className="flex gap-2 justify-content-center">
+                <PrimeButton 
+                    icon="pi pi-mobile"
+                    className="p-button-rounded p-button-info p-button-sm" 
+                    onClick={(e) => {
+                        e.stopPropagation(); // Prevent row click event
+                        navigate(`/user/reportPhone/details/${encryptParam(rowData.phonenumber)}`);
+                    }}
+                    tooltip="View Phone Usage"
+                    tooltipOptions={{ position: 'top' }}
+                />
+                <PrimeButton 
+                    icon="pi pi-list"
+                    className="p-button-rounded p-button-success p-button-sm"
+                    onClick={(e) => {
+                        e.stopPropagation(); // Prevent row click event
+                        navigate(`/user/reportApp/details/${encryptParam(rowData.phonenumber)}`);
+                    }}
+                    tooltip="View App Usage"
+                    tooltipOptions={{ position: 'top' }}
+                />
+            </div>
+        );
+    };
+
     return (
         <>
             <h4>View Study Group (Approved Participants List)</h4>
@@ -98,7 +126,6 @@ const ViewStudyGroup = () => {
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords}" rows={10} rowsPerPageOptions={[10, 20, 50]}
                 filters={{ 'global': { value: query, matchMode: FilterMatchMode.CONTAINS } }}
-                onRowClick={handleRowClick}
                 rowClassName={(rowData) => 'custom-hover-row'}
                 header={() => (
                     <div className='d-flex'>
@@ -126,6 +153,13 @@ const ViewStudyGroup = () => {
                 <Column key={'userID'} header={'UserID'} field={'userID'} sortable />
                 <Column key={'created_at'} header={'Registered Time'} field={'created_at'} sortable />
                 <Column key={'updated_at'} header={'Last Updated Time'} field={'updated_at'} sortable />
+                <Column 
+                    key="actions"
+                    header="View Details" 
+                    body={actionBodyTemplate} 
+                    style={{ width: '10rem' }}
+                    className="text-center"
+                />
             </DataTable>
         </>
     )

@@ -22,6 +22,7 @@ const UserNav = [
     { path: '/dashboard', Component: lazy(() => import("./pages/Users/Dashboard")) },
     { path: '/study', Component: lazy(() => import("./pages/Users/Study/StudyManagement")) },
     { path: '/study/view/:studyId', Component: lazy(() => import("./pages/Users/Study/ViewStudyGroup")) },
+    { path: '/reportPhone/details/:encryptedPhoneNumber', Component: lazy(() => import("./pages/Users/Study/ReportUserPhoneDetails")) },
     { path: '/reportApp/details/:encryptedPhoneNumber', Component: lazy(() => import("./pages/Users/Study/ReportUserAppDetails")) },
     { path: '/reportApp/details2/:encryptedPhoneNumber', Component: lazy(() => import("./pages/Users/Study/ReportUserAppDetails2")) },
     { path: '/categories', Component: lazy(() => import("./pages/Users/Category/CategoryManagement")) },
